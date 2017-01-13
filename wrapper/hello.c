@@ -41,4 +41,6 @@ void main(){
 }
 
 
+
+//http://intermediate-and-advanced-software-carpentry.readthedocs.io/en/latest/c++-wrapping.html
 //gcc test.c -L /usr/lib/python2.7/config -l python2.7 -o main
