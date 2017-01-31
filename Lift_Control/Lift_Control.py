@@ -1,38 +1,33 @@
 from ctypes import *
 import time
+from threading import Thread
 from Lift_struct import Lift
 
-mylib = CDLL("./../driver_py/libdriver.so")
+driver = CDLL("./../driver_py/libdriver.so")
 
-def lift_go(lift, direction):
-	mylib.elev_set_motor_direction(direction)
+def lift_init():
+	global lift
+	driver.elev_init()
+	while(1):
+		if (driver.elev_get_floor_sensor_signal() != -1):
+			lift.floor = driver.elev_get_floor_sensor_signal()
+		if (driver.elev_get_stop_signal() == 1):
+			lift_stop(lift)
+			
+		
+
+
+
+def lift_go(direction, lift):
+	driver.elev_set_motor_direction(direction)
 	lift.direction = direction	
 
 def lift_stop(lift):
-	lift_go(lift, 0)
+	lift_go(0, lift)
 
-def detect_floor(lift):
-	lift_go(lift,-1)
-	while (1):
-		if (mylib.elev_get_floor_sensor_signal() != -1):
-			a = mylib.elev_get_floor_sensor_signal()
-			lift_stop(lift)
-			lift.floor = a
-			return a
 
-def go_to_floor(floor, lift): # Både denne og detect er møkkajalla
-	while (lift.floor != floor):
-		if (lift.floor < floor):
-			lift_go(lift, 1)
-		elif (lift.floor > floor):
-			lift_go(lift,-1)
-		else:
-			print("Framme!")
-			lift.stop(lift)
+lift = Lift(2)
 
-frode = Lift(2)
 
-mylib.elev_init()
-detect_floor(frode)
-go_to_floor(1,frode)
-
+lift_thread = Thread(target = lift_init)
+lift_thread.start()
