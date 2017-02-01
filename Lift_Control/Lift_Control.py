@@ -1,9 +1,11 @@
 from ctypes import *
 import time
 from threading import Thread
-from Lift_struct import Lift
+from Lift_struct import Lift 
+from Lift_struct import Order
 
-driver = CDLL("./../driver_py/libdriver.so")
+
+driver = CDLL("./../driver/libdriver.so")
 
 def lift_init():
 	global lift
@@ -28,6 +30,8 @@ def lift_stop(lift):
 
 lift = Lift(2)
 
+lift_stop(lift)
 
-lift_thread = Thread(target = lift_init)
-lift_thread.start()
+
+#lift_thread = Thread(target = lift_init)
+#lift_thread.start()
