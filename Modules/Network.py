@@ -31,6 +31,22 @@ def UDP_receive(ip, port, timeout, return_queue):
 	return_queue.put(data)
 	return data
 
+def UDP_send_and_spam_until_confirmation(ip, port, data):
+	my_ip = ip
+	confirmation = '0'
+
+	return_queue = Queue.Queue() #Use queue to get the return value of the thread
+	confirmation_thread = Thread(target = UDP_receive, args = (my_ip, port+1, 4, return_queue)) # 4 second timeout
+	confirmation_thread.start()
+
+	while(confirmation_thread.isAlive()): #While we wait for a confirmation send over and over again
+		UDP_send(ip, port, data)
+		time.sleep(0.1)
+	
+	confirmation = return_queue.get()	
+
+	if (confirmation == '0'):
+		print ("My friend has died")
 
 
 def UDP_receive_and_confirm(ip, port, timeout):
@@ -50,25 +66,10 @@ def UDP_receive_and_confirm(ip, port, timeout):
 
 
 
-def UDP_send_and_spam_until_confirmation(ip, port, data):
-	my_ip = ip
-	confirmation = '0'
-
-	return_queue = Queue.Queue() #Use queue to get the return value of the thread
-	confirmation_thread = Thread(target = UDP_receive, args = (my_ip, port+1, 4, return_queue)) # 4 second timeout
-	confirmation_thread.start()
-
-	while(confirmation_thread.isAlive()): #While we wait for a confirmation send over and over again
-		UDP_send(ip, port, data)
-		time.sleep(0.1)
-	
-	confirmation = return_queue.get()	
-
-	if (confirmation == '0'):
-		print ("My friend has died")
 
 
 
+#Message handling
 
 def encode_order(Order):
 	return ("%d %d" %(Order.floor, Order.direction))
@@ -76,11 +77,17 @@ def encode_order(Order):
 def decode_order(message):
 	if (message[0].isdigit() == False):	
 		print("Message is invalid")
-		return Order(0,0) #0,0-order is invalid order
+		return Order(0,0) #0,0-order is invalid order and will do nothing
 	floor = int(message[0])
 	if (message[2] == '-'):
+		if (message[3].isdigit() == False):	
+			print("Message is invalid")
+			return Order(0,0)
 		direction = int(message[2:4])
 	else:
+		if (message[2].isdigit() == False):	
+			print("Message is invalid")
+			return Order(0,0)
 		direction = int(message[2])
 
 	return Order(floor, direction)
@@ -88,12 +95,13 @@ def decode_order(message):
 
 # A message is for ex: "0,Order,3 -1,11 "
 
-def identify_and_decode_message(message_string):
+def classify_and_decode_message(message_string):
 	message = message_string.split(',')
 	if (message[1] == 'Order'):
 		decode_order_message(message)
-	
-	
+	elif(message[1] == "Alive"):
+		decode_Im_alive_message(message)
+
 
 def encode_order_message(lift, order):
 	s1 = ("%d," %(lift.name))
@@ -106,23 +114,13 @@ def decode_order_message(message): #message is a list
 	lift_name = int(message[0])
 	order = decode_order(message[2])
 	cost = int(message[3])
+	print_order(order)
 
+def encode_Im_alive_message(lift):
+	s1 = ("%d," %(lift.name))
+	s2 = "Alive,"
+	s3 = ("%d," %(lift.is_alive))
+	return s1 + s2 + s3
 
-	
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+def decode_Im_alive_message():
+	return 0
