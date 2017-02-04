@@ -16,9 +16,9 @@ def UDP_send(ip, port, data):
 	sock_send.sendto(data, (ip, port))
 	
 
-def UDP_receive(ip, port, timeout, return_queue):
+def UDP_receive(port, timeout, return_queue):
 	sock_receive = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-	sock_receive.bind((ip, port))
+	sock_receive.bind(('', port)) #maa bruke egen IP her
 	sock_receive.setblocking(0)	
 	data = '0'
 
@@ -31,16 +31,15 @@ def UDP_receive(ip, port, timeout, return_queue):
 	return_queue.put(data)
 	return data
 
-def UDP_send_and_spam_until_confirmation(ip, port, data):
-	my_ip = ip
+def UDP_send_and_spam_until_confirmation(remote_ip, port, data):
 	confirmation = '0'
 
 	return_queue = Queue.Queue() #Use queue to get the return value of the thread
-	confirmation_thread = Thread(target = UDP_receive, args = (my_ip, port+1, 4, return_queue)) # 4 second timeout
+	confirmation_thread = Thread(target = UDP_receive, args = (port+1, 4, return_queue)) # 4 second timeout
 	confirmation_thread.start()
 
 	while(confirmation_thread.isAlive()): #While we wait for a confirmation send over and over again
-		UDP_send(ip, port, data)
+		UDP_send(remote_ip, port, data)
 		time.sleep(0.1)
 	
 	confirmation = return_queue.get()	
@@ -93,14 +92,17 @@ def decode_order(message):
 	return Order(floor, direction)
 
 
-# A message is for ex: "0,Order,3 -1,11 "
+# A message is for ex: "0,Order,3 -1,11"
 
 def classify_and_decode_message(message_string):
-	message = message_string.split(',')
-	if (message[1] == 'Order'):
-		decode_order_message(message)
-	elif(message[1] == "Alive"):
-		decode_Im_alive_message(message)
+	if (message_string != '0'):
+		message = message_string.split(',')
+		if (message[1] == 'Order'):
+			decode_order_message(message)
+		elif(message[1] == "Alive"):
+			decode_Im_alive_message(message)
+	else:
+		print("No message to decode")
 
 
 def encode_order_message(lift, order):
@@ -122,5 +124,6 @@ def encode_Im_alive_message(lift):
 	s3 = ("%d," %(lift.is_alive))
 	return s1 + s2 + s3
 
-def decode_Im_alive_message():
+def decode_Im_alive_message(message): #message is a list
+	
 	return 0
