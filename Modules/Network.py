@@ -11,9 +11,9 @@ def find_ip():
 	s.connect(("gmail.com",80))
 	return (s.getsockname()[0])
 
-def UDP_send(remote_ip, port, data):
+def UDP_send(ip, port, data):
 	sock_send = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-	sock_send.sendto(data, (remote_ip, port))
+	sock_send.sendto(data, (ip, port))
 	
 
 def UDP_receive(port, timeout, return_queue):
@@ -46,13 +46,16 @@ def UDP_send_and_spam_until_confirmation(remote_ip, port, data):
 
 	if (confirmation == '0'):
 		print ("My friend has died")
+	else:
+		print("Message sent and my friend is still alive")
 
 
-def UDP_receive_and_confirm(remote_ip, port, timeout):
+def UDP_receive_and_confirm(ip, port, timeout):
+	remote_ip = ip
 	sock_receive = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-	sock_receive.bind(('', port))
+	sock_receive.bind((ip, port))
 	sock_receive.setblocking(0)	
-	data = '0'
+	data = '0'	
 
 	ready = select.select([sock_receive], [], [], timeout)
 	if (ready[0]):
@@ -124,4 +127,5 @@ def encode_Im_alive_message(lift):
 	return s1 + s2 + s3
 
 def decode_Im_alive_message(message): #message is a list
+	
 	return 0
