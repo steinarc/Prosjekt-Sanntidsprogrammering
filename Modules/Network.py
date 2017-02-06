@@ -53,7 +53,7 @@ def UDP_send_and_spam_until_confirmation(remote_ip, port, data):
 def UDP_receive_and_confirm(ip, port, timeout):
 	remote_ip = ip
 	sock_receive = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-	sock_receive.bind((ip, port))
+	sock_receive.bind(('', port))
 	sock_receive.setblocking(0)	
 	data = '0'	
 
