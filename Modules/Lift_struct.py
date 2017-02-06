@@ -8,6 +8,7 @@ class Lift:
 		self.all_external_orders = []
 		self.active_lifts = [] #[0 1 0]
 		self.ip_list = [] #[123.289.477.387, 82.39.47.489, 78.42.03]
+		self.costlist = []
 
 class Order:
 	def __init__(self, floor, direction):

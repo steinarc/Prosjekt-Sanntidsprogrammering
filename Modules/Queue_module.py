@@ -5,7 +5,6 @@ def add_order(order, orderlist):
 	i = 0
 	while (i < len(orderlist)): #Loop throws away duplicates
 		if ((order.floor == orderlist[i].floor) and (order.direction == orderlist[i].direction)):
-			print("Hei: %d" % (i))
 			i = 0
 			break
 		i = i + 1

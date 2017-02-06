@@ -2,38 +2,9 @@ import socket
 import select
 import time
 import Queue
-import sys
 from Lift_struct import *
 from Queue_module import *
 from threading import Thread
-
-def get_my_ip():
-	s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-	s.connect(("gmail.com",80))
-	return (s.getsockname()[0])
-
-def broadcast_my_IP(port):
-
-	try :
-		s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-		#print ('Socket created'.encode())
-	except (socket.error, msg):
-		print ('Failed to create socket. Error Code : '.encode() + str(msg[0]) + ' Message '.encode() + msg[1])
-		sys.exit()
-
-	s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-	s.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-	
-	MY_IP = get_my_ip()
-	print(b'Broadcasting my ip address!')
-	
-	while(True):
-		s.sendto(MY_IP.encode(),('255.255.255.255',port))
-		#print(MY_IP)
-		time.sleep(1)
-	
-	s.close()
-
 
 def UDP_send(ip, port, data):
 	sock_send = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -88,6 +59,31 @@ def UDP_receive_and_confirm(ip, port, timeout):
 	return (data)
 		
 
+def get_my_ip():
+	s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+	s.connect(("gmail.com",80))
+	return (s.getsockname()[0])
+
+def broadcast_my_IP(port):
+
+	try :
+		s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+		#print ('Socket created'.encode())
+	except (socket.error, msg):
+		print ('Failed to create socket. Error Code : '.encode() + str(msg[0]) + ' Message '.encode() + msg[1])
+		sys.exit()
+
+	s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+	s.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+	
+	MY_IP = get_my_ip()
+	print(b'Broadcasting my ip address!')
+	
+	while(True):
+		s.sendto(MY_IP.encode(),('255.255.255.255',port))
+		#print(MY_IP)
+		time.sleep(1)
+	s.close()
 
 
 
