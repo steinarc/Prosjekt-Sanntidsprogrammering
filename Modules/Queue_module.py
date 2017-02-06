@@ -2,7 +2,16 @@ from Lift_struct import *
 
 
 def add_order(order, orderlist):
-	orderlist.extend([order])
+	i = 0
+	while (i < len(orderlist)): #Loop throws away duplicates
+		if ((order.floor == orderlist[i].floor) and (order.direction == orderlist[i].direction)):
+			print("Hei: %d" % (i))
+			i = 0
+			break
+		i = i + 1
+
+	if (i == len(orderlist)):
+		orderlist.extend([order])
 
 def print_order(order):
 	print ("[%d, %d]" % (order.floor, order.direction))

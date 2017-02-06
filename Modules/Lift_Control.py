@@ -1,8 +1,8 @@
 from ctypes import *
 import time
-from threading import Thread
-from Lift_struct import Lift 
-from Lift_struct import Order
+from threading import Thread, Lock
+from Lift_struct import *
+from Queue_module import *
 
 
 driver = CDLL("./../driver/libdriver.so")
@@ -42,10 +42,22 @@ def lift_go_to_floor(floor, lift, timeout):
 
 
 #This function prints if ONLY ONE selected button is pressed
-def listen_button(button_type, floor): #type: 0 = up, 1 = down, 2 = internal
+def listen_button(button_type, floor, lift): #type: 0 = up, 1 = down, 2 = internal
+	direction = 0
 	while(1):
 		if (driver.elev_get_button_signal(button_type, floor) == 1):
-			print("%d, i etasje %d" % (button_type, floor + 1))
+			#print("%d, i etasje %d" % (button_type, floor + 1))			
+			if (button_type == 2):
+				order = Order(floor, 0) #direction = 0 for internal order
+
+				add_order(order, lift.my_orders)
+			else:
+				if (button_type == 0):
+					direction = 1
+				elif (button_type == 1):
+					direction = -1
+				order = Order(floor, direction)
+				add_order(order, lift.all_external_orders)
 			time.sleep(0.1)
 		if (driver.elev_get_stop_signal() == 1): #Does not work right after
 			driver.elev_set_stop_lamp(1)
@@ -53,17 +65,17 @@ def listen_button(button_type, floor): #type: 0 = up, 1 = down, 2 = internal
 
 
 
-def listen_all_buttons(): #Run as thread
-	thread1 = Thread(target = listen_button, args = (0,0))
-	thread2 = Thread(target = listen_button, args = (0,1))
-	thread3 = Thread(target = listen_button, args = (0,2))
-	thread4 = Thread(target = listen_button, args = (1,1))
-	thread5 = Thread(target = listen_button, args = (1,2))
-	thread6 = Thread(target = listen_button, args = (1,3))
-	thread7 = Thread(target = listen_button, args = (2,0))
-	thread8 = Thread(target = listen_button, args = (2,1))
-	thread9 = Thread(target = listen_button, args = (2,2))
-	thread10 = Thread(target = listen_button, args = (2,3))
+def listen_all_buttons(lift): #Run as thread
+	thread1 = Thread(target = listen_button, args = (0,0,lift))
+	thread2 = Thread(target = listen_button, args = (0,1,lift))
+	thread3 = Thread(target = listen_button, args = (0,2,lift))
+	thread4 = Thread(target = listen_button, args = (1,1,lift))
+	thread5 = Thread(target = listen_button, args = (1,2,lift))
+	thread6 = Thread(target = listen_button, args = (1,3,lift))
+	thread7 = Thread(target = listen_button, args = (2,0,lift))
+	thread8 = Thread(target = listen_button, args = (2,1,lift))
+	thread9 = Thread(target = listen_button, args = (2,2,lift))
+	thread10 = Thread(target = listen_button, args = (2,3,lift))
 	thread1.start()
 	thread2.start()
 	thread3.start()
@@ -75,11 +87,14 @@ def listen_all_buttons(): #Run as thread
 	thread9.start()
 	thread10.start()
 
+def execute_order(lift):
+	if (len(lift.my_orders) > 0):
+		lift_go_to_floor(lift.my_orders[0].floor, lift, 0)
+		lift.my_orders.pop(0)
 
 
 lift = Lift(2)
 driver.elev_init()
-
 
 #driver.elev_set_floor_indicator(3), viser hvor vi er.
 #driver.elev_set_button_lamp(button, floor, value), button: 0 = OPP, 1 = NED, 2 = HEISPANEL, value = AV/PA, 0/1
@@ -89,15 +104,14 @@ driver.elev_init()
 #while(1):
 #	time.sleep(0.1)
 
-thread_lift = Thread(target = lift_find_floor, args = (lift,)) #maybe it is a shallow copy?? carefull!
-thread_lift.start()
+thread_lift_find_floor = Thread(target = lift_find_floor, args = (lift,)) #maybe it is a shallow copy?? carefull!
+thread_listen_buttons = Thread(target = listen_all_buttons, args = (lift,))
+thread_lift_find_floor.start()
+thread_listen_buttons.start()
 
-lift_go(-1,lift)
-time.sleep(3)
-lift_stop(lift)
-print(lift.floor)
 
-thread_set_position = Thread(target = lift_go_to_floor, args = (2, lift, 0))
-thread_set_position.start()
+order = Order(1,1)
+
+
 
 
