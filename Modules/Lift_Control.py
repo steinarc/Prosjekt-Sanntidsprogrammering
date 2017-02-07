@@ -93,24 +93,15 @@ def execute_order(lift):
 		lift.my_orders.pop(0)
 
 
-lift = Lift(2)
-driver.elev_init()
-
 #driver.elev_set_floor_indicator(3), viser hvor vi er.
 #driver.elev_set_button_lamp(button, floor, value), button: 0 = OPP, 1 = NED, 2 = HEISPANEL, value = AV/PA, 0/1
 #driver.elev_set_door_open_lamp(0) #, DOR APEN
 
 
-#while(1):
-#	time.sleep(0.1)
-
-thread_lift_find_floor = Thread(target = lift_find_floor, args = (lift,)) #maybe it is a shallow copy?? carefull!
-thread_listen_buttons = Thread(target = listen_all_buttons, args = (lift,))
-thread_lift_find_floor.start()
-thread_listen_buttons.start()
-
-
-order = Order(1,1)
+#thread_lift_find_floor = Thread(target = lift_find_floor, args = (lift,)) #maybe it is a shallow copy?? carefull!
+#thread_listen_buttons = Thread(target = listen_all_buttons, args = (lift,))
+#thread_lift_find_floor.start()
+#thread_listen_buttons.start()
 
 
 

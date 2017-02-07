@@ -6,6 +6,8 @@ from Lift_struct import *
 from Queue_module import *
 from threading import Thread
 
+PORT = 20018
+
 def UDP_send(ip, port, data):
 	sock_send = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 	sock_send.sendto(data, (ip, port))
@@ -45,8 +47,7 @@ def UDP_send_and_spam_until_confirmation(remote_ip, port, data):
 		print("Message sent and my friend is still alive")
 
 
-def UDP_receive_and_confirm(ip, port, timeout):
-	remote_ip = ip
+def UDP_receive_and_confirm(remote_ip, port, timeout):
 	sock_receive = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 	sock_receive.bind(('', port))
 	sock_receive.setblocking(0)	
@@ -57,6 +58,21 @@ def UDP_receive_and_confirm(ip, port, timeout):
 		data, addr = sock_receive.recvfrom(1024)
 		UDP_send(remote_ip, port+1, '1')
 	return (data)
+
+#Denne funksjonen ble laget fordi naar en heis mottar en melding vet vi
+#ikke paa forhaand hvem som sendte den, det staar i selve meldinga
+#tanken er at denne funksjonen skal kjoere i all evighet
+#derfor puttes mottatt data inn i en koe, og ikke som returverdi
+def UDP_receive_and_confirm_any_lift(port, lift, timeout):
+	sock_receive = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+	sock_receive.bind(('', port))
+	data = ''
+		
+	data, addr = sock_receive.recvfrom(1024)
+	if (len(data) > 0):
+		remote_ip = lift.ip_list[int(data[0])]
+		UDP_send(remote_ip, port+1, '1')
+		return (data)
 		
 
 def get_my_ip():
@@ -86,8 +102,22 @@ def broadcast_my_IP(port):
 	s.close()
 
 
+def send_order_active_lifts(lift, order):	
+	message = encode_order_message(lift,order)
+	for i in range (0,3):
+		if (i != lift.name and lift.active_lifts[i] == 1):
+			remote_ip = lift.ip_list[i]
+			UDP_send_and_spam_until_confirmation(remote_ip, PORT, message)
 
+def receive_message_and_act(lift, port): #will always be run as a thread ALWAYS!
+	message = UDP_receive_and_confirm_any_lift(port, 10, lift)
+	
 
+lift = Lift(0)
+lift.ip_list = ['127.0.0.1', '127.0.0.1', '127.0.0.1']
+lift.active_lifts = [1, 1, 1]
+
+receive_message_and_act(lift, PORT)
 
 
 #Message handling
@@ -123,6 +153,8 @@ def classify_and_decode_message(message_string):
 			decode_order_message(message)
 		elif(message[1] == "Alive"):
 			decode_Im_alive_message(message)
+		elif(message[1] == "Cost"):
+			decode_cost_message(message)
 	else:
 		print("No message to decode")
 
@@ -134,11 +166,7 @@ def encode_order_message(lift, order):
 	s4 = "0" #cost
 	return s1 + s2 + s3 + s4
 
-def decode_order_message(message): #message is a list
-	lift_name = int(message[0])
-	order = decode_order(message[2])
-	cost = int(message[3])
-	print_order(order)
+
 
 def encode_Im_alive_message(lift):
 	s1 = ("%d," %(lift.name))
@@ -146,6 +174,16 @@ def encode_Im_alive_message(lift):
 	s3 = ("%d," %(lift.is_alive))
 	return s1 + s2 + s3
 
+def decode_order_message(message): #message is a list
+	lift_name = int(message[0])
+	order = decode_order(message[2])
+	cost = int(message[3])
+	print_order(order)
+
 def decode_Im_alive_message(message): #message is a list
+	
+	return 0
+
+def decode_cost_message(message): #message is a list
 	
 	return 0

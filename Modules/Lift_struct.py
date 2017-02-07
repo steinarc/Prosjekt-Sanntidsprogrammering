@@ -6,7 +6,7 @@ class Lift:
 		self.direction = 0
 		self.my_orders = []
 		self.all_external_orders = []
-		self.active_lifts = [] #[0 1 0]
+		self.active_lifts = [] #[1 1 0]
 		self.ip_list = [] #[123.289.477.387, 82.39.47.489, 78.42.03]
 		self.costlist = []
 
