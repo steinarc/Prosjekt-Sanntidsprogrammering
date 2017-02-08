@@ -81,7 +81,7 @@ def get_my_ip():
 	return (s.getsockname()[0])
 
 def broadcast_my_IP(port):
-
+#Steinars ip er 10.22.69.248
 	try :
 		s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 		#print ('Socket created'.encode())
@@ -113,11 +113,11 @@ def receive_message_and_act(lift, port): #will always be run as a thread ALWAYS!
 	message = UDP_receive_and_confirm_any_lift(port, lift, 10)
 	
 
-lift = Lift(0)
-lift.ip_list = ['127.0.0.1', '127.0.0.1', '127.0.0.1']
-lift.active_lifts = [1, 1, 1]
+#lift = Lift(0)
+#lift.ip_list = ['127.0.0.1', '127.0.0.1', '127.0.0.1']
+#lift.active_lifts = [1, 1, 1]
 
-receive_message_and_act(lift, PORT)
+#receive_message_and_act(lift, PORT)
 
 
 #Message handling

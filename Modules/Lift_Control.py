@@ -4,6 +4,7 @@ from Lift_struct import *
 from Queue_module import *
 from driver import *
 
+driver = CDLL("./../driver/libdriver.so")
 
 def lift_find_floor(lift):
 	while(1):
@@ -37,10 +38,6 @@ def lift_go_to_floor(floor, lift, timeout):
 			prev_floor = lift.floor
 
 
-
-
-#This function prints if ONLY ONE selected button is pressed
-
 def execute_order(lift):
 	if (len(lift.my_orders) > 0):
 		lift_go_to_floor(lift.my_orders[0].floor, lift, 0)
@@ -51,18 +48,6 @@ def execute_order(lift):
 #driver.elev_set_button_lamp(button, floor, value), button: 0 = OPP, 1 = NED, 2 = HEISPANEL, value = AV/PA, 0/1
 #driver.elev_set_door_open_lamp(0) #, DOR APEN
 
-lift = Lift(0)
-driver.elev_init()
-
-
-thread_lift_find_floor = Thread(target = lift_find_floor, args = (lift,)) #maybe it is a shallow copy?? carefull!
-thread_listen_buttons = Thread(target = listen_all_buttons, args = (lift,))
-thread_lift_find_floor.start()
-thread_listen_buttons.start()
-
-
-while(1):
-	execute_order(lift)
 
 
 
