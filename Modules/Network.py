@@ -110,7 +110,7 @@ def send_order_active_lifts(lift, order):
 			UDP_send_and_spam_until_confirmation(remote_ip, PORT, message)
 
 def receive_message_and_act(lift, port): #will always be run as a thread ALWAYS!
-	message = UDP_receive_and_confirm_any_lift(port, 10, lift)
+	message = UDP_receive_and_confirm_any_lift(port, lift, 10)
 	
 
 lift = Lift(0)
