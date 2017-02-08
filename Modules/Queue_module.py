@@ -18,10 +18,3 @@ def print_order(order):
 def print_orderlist(orderlist):
 	for i in range (0, len(orderlist)):
 		print_order(orderlist[i])
-
-
-
-
-
-
-
