@@ -49,3 +49,20 @@ def listen_all_buttons(lift): #Run as thread
 	thread8.start()
 	thread9.start()
 	thread10.start()
+
+def lift_find_floor(lift):
+	while(1):
+		floor = driver.elev_get_floor_sensor_signal()
+		if (floor != -1):
+			lift.floor = floor
+			driver.elev_set_floor_indicator(lift.floor)
+
+		if (driver.elev_get_stop_signal() == 1):
+			break
+
+def lift_move_direction(lift, direction):
+	driver.elev_set_motor_direction(direction)
+	lift.direction = direction	
+
+def lift_stop(lift):
+	lift_move_direction(lift, 0)

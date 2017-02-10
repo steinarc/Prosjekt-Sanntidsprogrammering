@@ -18,3 +18,16 @@ def print_order(order):
 def print_orderlist(orderlist):
 	for i in range (0, len(orderlist)):
 		print_order(orderlist[i])
+
+def orders_are_equal(order1, order2):
+	if ((order1.floor == order2.floor) and (order1.direction == order2.direction)):
+		return True
+	else:
+		return False
+
+def order_index_in_list(order, orderlist):
+	for i in range (0, len(orderlist)):
+		if (orders_are_equal(order, orderlist[i])):
+			return i
+	print("Order is not in list")
+	return -1

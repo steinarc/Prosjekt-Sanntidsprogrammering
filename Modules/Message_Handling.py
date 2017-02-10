@@ -5,6 +5,15 @@ from Lift_struct import *
 # A message is for ex: "0,Alive"
 # A message is for ex: "0,Cost,11"
 
+def send_order_message(lift, order):
+	message = encode_order_message(lift,order)
+	for i in range (0,3):
+		if (i != lift.name and lift.active_lifts[i] == 1):
+			remote_ip = lift.ip_list[i]
+			send_and_spam_until_confirmation(remote_ip, PORT, message)
+
+
+
 
 def classify_message(message_string):
 	if (message_string != '0'):
@@ -32,20 +41,17 @@ def decode_order_message(message): #message is a string
 	order = decode_order(message[2])
 	return lift_name, order #Will return other values as well
 
-
 def encode_Im_alive_message(lift):
 	s1 = ("%d," %(lift.name))
 	s2 = "Alive,"
 	s3 = ("%d," %(lift.is_alive))
 	return s1 + s2 + s3
 
-
-def decode_Im_alive_message(message): #message is a list
+def decode_Im_alive_message(message):
 	message = message.split(',')
 	lift_name = int(message[0])
 	alive = int(message[2])
 	return lift_name, alive
-
 
 def encode_command_message(lift, order):
 	s1 = ("%d," % (lift.name))
@@ -53,18 +59,37 @@ def encode_command_message(lift, order):
 	s3 = encode_order(order)
 	return s1 + s2 + s3
 
-def decode_command_message(message): #So put your hands down my pants and i bet youll feel nuts
+def decode_command_message(message):
 	message = message.split(',')
 	lift_name = int(message[0])
 	order = decode_order(message[2])
 	return lift_name, order
 
-def decode_cost_message(message): #message is a list
-	
-	return 0
+def encode_cost_message(lift, order):
+	s1 = ("%d," % (lift.name))
+	s2 = "Cost,"
+	s3 = encode_order(order)
+	s4 = (",%d" % (calculate_cost(lift,order)))
+	return s1 + s2 + s3 + s4
 
+def decode_cost_message(message):
+	message = message.split(',')
+	lift_name = int(message[0])
+	order = decode_order(message[2])
+	cost = int(message[3])
+	return lift_name, order, cost
 
+def encode_executed_message(lift, order):
+	s1 = ("%d," % (lift.name))
+	s2 = "Executed,"
+	s3 = encode_order(order)
+	return s1 + s2 + s3
 
+def decode_executed_message(message): #So put your hands down my pants and i bet youll feel nuts
+	message = message.split(',')
+	lift_name = int(message[0])
+	order = decode_order(message[2])
+	return lift_name, order
 
 
 def encode_order(order): #Returns a string
