@@ -12,8 +12,10 @@ def send_order_message(lift, order):
 			remote_ip = lift.ip_list[i]
 			send_and_spam_until_confirmation(remote_ip, PORT, message)
 
-def send_command_message(lift, order, external_lift):
-	return 0
+def send_command_message(lift, order, external_lift_number):
+	message = encode_command_message(lift, order)
+	remote_ip = lift.ip_list[external_lift_number]
+	send_and_spam_until_confirmation(remote_ip, PORT, message)
 
 
 def classify_message(message_string):
