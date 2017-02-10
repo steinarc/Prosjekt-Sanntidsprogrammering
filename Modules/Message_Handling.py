@@ -1,5 +1,5 @@
 from Lift_struct import *
-
+from Network import *
 
 # A message is for ex: "0,Order,3 -1"
 # A message is for ex: "0,Alive"
@@ -12,7 +12,8 @@ def send_order_message(lift, order):
 			remote_ip = lift.ip_list[i]
 			send_and_spam_until_confirmation(remote_ip, PORT, message)
 
-
+def send_command_message(lift, order, external_lift):
+	return 0
 
 
 def classify_message(message_string):
