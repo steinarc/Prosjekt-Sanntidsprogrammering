@@ -17,11 +17,8 @@ def main():
 	#thread_receive_message.start()
 
 	while(1):
-		print(driver.elev_get_stop_signal())
+		execute_order(lift)
 
-	#while(1):
-	#	print (lift.active_lifts)
-	#	time.sleep(1)
 
 	#send_and_spam_until_confirmation('10.22.69.248', 20018, b'Hei sveis')
 

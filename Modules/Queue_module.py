@@ -1,6 +1,5 @@
 from Lift_struct import *
 
-
 def add_order(order, orderlist):
 	i = 0
 	while (i < len(orderlist)): #Loop throws away duplicates

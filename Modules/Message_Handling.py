@@ -12,11 +12,29 @@ def send_order_message(lift, order):
 			remote_ip = lift.ip_list[i]
 			send_and_spam_until_confirmation(remote_ip, PORT, message)
 
+def send_Im_alive_message(lift, order):
+	message = encode_Im_alive_message(lift)
+	for i in range (0,3):
+		if (i != lift.name and lift.active_lifts[i] == 1):
+			remote_ip = lift.ip_list[i]
+			send_and_spam_until_confirmation(remote_ip, PORT, message)
+
+def send_cost_message(lift, order, external_lift_number):
+	message = encode_cost_message(lift, order)
+	remote_ip = lift.ip_list[external_lift_number]
+	send_and_spam_until_confirmation(remote_ip, PORT, message)
+
 def send_command_message(lift, order, external_lift_number):
 	message = encode_command_message(lift, order)
 	remote_ip = lift.ip_list[external_lift_number]
 	send_and_spam_until_confirmation(remote_ip, PORT, message)
 
+def send_executed_message(lift, order):
+	message = encode_executed_message(lift, order)
+	for i in range (0,3):
+		if (i != lift.name and lift.active_lifts[i] == 1):
+			remote_ip = lift.ip_list[i]
+			send_and_spam_until_confirmation(remote_ip, PORT, message)	
 
 def classify_message(message_string):
 	if (message_string != '0'):

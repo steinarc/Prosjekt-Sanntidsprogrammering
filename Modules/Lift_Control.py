@@ -32,7 +32,8 @@ def lift_go_to_floor(lift, floor, timeout):
 def execute_order(lift):
 	if (len(lift.my_orders) > 0):
 		lift_go_to_floor(lift, lift.my_orders[0].floor, 0)
-		lift.my_orders.pop(0)
+		with lock:
+			lift.my_orders.pop(0)
 
 
 #driver.elev_set_floor_indicator(3), viser hvor vi er.
@@ -47,27 +48,31 @@ def receive_message_and_act(lift, port): #will always be run as a thread ALWAYS!
 		message_type = classify_message(message)
 
 		if (message_type == 'Order'):
-			lift_name, order = decode_order_message(message)
-		#Calculate my cost
-		#send it back to the sender in a cost-message
-
+			sending_lift, order = decode_order_message(message)
+			cost = calculate_cost(lift, order)
+			send_cost_message(lift, order, sending_lift)
 		elif(message_type == 'Alive'):
 			lift_name, alive = decode_Im_alive_message(message)
-			lift.active_lifts[lift_name] = alive
+			with lock:
+				lift.active_lifts[lift_name] = alive
 		elif(message_type == 'Cost'):
 			lift_name, order, cost = decode_cost_message(message)
+			with lock:
+				
 
 			#add costs to lift.costlist, when list i full, find least cost and
 			#Then send_command_message
 
 		elif(message_type == 'Command'):
 			lift_name, order = decode_command_message(message)
-			add_order(order, lift.my_orders)
+			with lock:
+				add_order(order, lift.my_orders)
 		elif(message_type == 'Executed'):
 			lift_name, order = decode_executed_message(message)
 			index = order_index_in_list(order, lift.all_external_orders)
 			if (index > 0):
-				lift.all_external_orders.pop(index)
+				with lock:
+					lift.all_external_orders.pop(index)
 				print("Order successfully removed")
 				
 
