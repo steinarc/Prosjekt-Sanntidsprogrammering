@@ -1,5 +1,6 @@
 from Lift_struct import *
 from Network import *
+from Cost import *
 
 # A message is for ex: "0,Order,3 -1"
 # A message is for ex: "0,Alive"

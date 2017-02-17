@@ -62,6 +62,8 @@ def receive_and_confirm(lift, port):
 		remote_ip = lift.ip_list[int(data[0])]
 		#UDP_send(remote_ip, port+1, '1')
 		sock_send.sendto('1', (remote_ip, port + 1))
+		sock_send.close()
+		sock_receive.close()
 		return (data)
 		
 

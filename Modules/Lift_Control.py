@@ -48,8 +48,10 @@ def listen_external_buttons_and_send_order(lift,port,button_queue):
 			order = button_queue.get()
 			with lock:
 				add_order(order, lift.all_external_orders)
+			lift.costlist[lift.name] = calculate_cost(order)
 			send_order_message(lift,order)
-			
+
+
 
 
 
@@ -70,8 +72,11 @@ def receive_message_and_act(lift, port): #will always be run as a thread ALWAYS!
 				lift.active_lifts[lift_name] = alive
 		elif(message_type == 'Cost'):
 			lift_name, order, cost = decode_cost_message(message)
+			print(message)
 			#with lock:
-				
+			lift.costlist[lift_name] = cost	 ##Do this for both elevators!!!!
+			lift_with_minimal_cost_name = find_lift_with_minimal_cost(lift)
+			send_command_message(lift, order, lift_with_minimal_cost_name)
 
 			#add costs to lift.costlist, when list i full, find least cost and
 			#Then send_command_message
