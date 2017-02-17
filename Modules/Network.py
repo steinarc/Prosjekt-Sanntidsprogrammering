@@ -21,6 +21,7 @@ def receive(port, timeout, return_queue):
 		print("nothing was received")	
 
 	return_queue.put(data)
+	sock_receive.close() #This is new, so remove hvis feil oppstaar
 	return data
 
 def send_and_spam_until_confirmation(remote_ip, port, data):
@@ -39,7 +40,7 @@ def send_and_spam_until_confirmation(remote_ip, port, data):
 		time.sleep(0.1)
 	
 	confirmation = return_queue.get()	
-
+	sock_send.close() #Fjern dette om feil plutselig oppstaar
 	if (confirmation == '0'):
 		print ("My friend has died")
 	else:

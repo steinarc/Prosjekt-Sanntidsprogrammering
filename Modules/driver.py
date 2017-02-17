@@ -7,7 +7,7 @@ driver = CDLL("./../driver/libdriver.so")
 
 lock = RLock()
 
-def listen_button(button_type, floor, lift): #type: 0 = up, 1 = down, 2 = internal
+def listen_button(button_type, floor, lift, button_queue): #type: 0 = up, 1 = down, 2 = internal
 	direction = 0
 	while(1):
 		if (driver.elev_get_button_signal(button_type, floor) == 1):
@@ -22,26 +22,27 @@ def listen_button(button_type, floor, lift): #type: 0 = up, 1 = down, 2 = intern
 				elif (button_type == 1):
 					direction = -1
 				order = Order(floor, direction)
+				#with lock:
+				#	add_order(order, lift.all_external_orders)
 				with lock:
-					add_order(order, lift.all_external_orders)
-			time.sleep(0.1)
-		if (driver.elev_get_stop_signal() == 1): #Does not work right after
-			driver.elev_set_stop_lamp(1)
+					button_queue.put(order)			
+			time.sleep(1)
+		if (lift.stopped == 1): #Does not work right after
 			break
 
 
 
-def listen_all_buttons(lift): #Run as thread
-	thread1 = Thread(target = listen_button, args = (0,0,lift))
-	thread2 = Thread(target = listen_button, args = (0,1,lift))
-	thread3 = Thread(target = listen_button, args = (0,2,lift))
-	thread4 = Thread(target = listen_button, args = (1,1,lift))
-	thread5 = Thread(target = listen_button, args = (1,2,lift))
-	thread6 = Thread(target = listen_button, args = (1,3,lift))
-	thread7 = Thread(target = listen_button, args = (2,0,lift))
-	thread8 = Thread(target = listen_button, args = (2,1,lift))
-	thread9 = Thread(target = listen_button, args = (2,2,lift))
-	thread10 = Thread(target = listen_button, args = (2,3,lift))
+def listen_all_buttons(lift, button_queue): #Run as thread
+	thread1 = Thread(target = listen_button, args = (0,0,lift, button_queue))
+	thread2 = Thread(target = listen_button, args = (0,1,lift, button_queue))
+	thread3 = Thread(target = listen_button, args = (0,2,lift, button_queue))
+	thread4 = Thread(target = listen_button, args = (1,1,lift, button_queue))
+	thread5 = Thread(target = listen_button, args = (1,2,lift, button_queue))
+	thread6 = Thread(target = listen_button, args = (1,3,lift, button_queue))
+	thread7 = Thread(target = listen_button, args = (2,0,lift, button_queue))
+	thread8 = Thread(target = listen_button, args = (2,1,lift, button_queue))
+	thread9 = Thread(target = listen_button, args = (2,2,lift, button_queue))
+	thread10 = Thread(target = listen_button, args = (2,3,lift, button_queue))
 	thread1.start()
 	thread2.start()
 	thread3.start()
@@ -62,6 +63,9 @@ def lift_find_floor(lift):
 			driver.elev_set_floor_indicator(lift.floor)
 
 		if (driver.elev_get_stop_signal() == 1):
+			driver.elev_set_stop_lamp(1)
+			with lock:
+				lift.stopped = 1
 			break
 
 def lift_move_direction(lift, direction):

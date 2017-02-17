@@ -11,7 +11,7 @@ driver = CDLL("./../driver/libdriver.so")
 def lift_go_to_floor(lift, floor, timeout):
 	prev_floor = -1
 	while(1):
-		if (driver.elev_get_stop_signal() == 1):
+		if (lift.stopped == 1):
 			lift_stop(lift)
 			break
 
@@ -40,7 +40,20 @@ def execute_order(lift):
 #driver.elev_set_button_lamp(button, floor, value), button: 0 = OPP, 1 = NED, 2 = HEISPANEL, value = AV/PA, 0/1
 #driver.elev_set_door_open_lamp(0) #, DOR APEN
 
+def listen_external_buttons_and_send_order(lift,port,button_queue):
+	while(1):
+		if (lift.stopped == 1): #Does not work right after
+			break
+		if (button_queue.empty() == 0):
+			order = button_queue.get()
+			with lock:
+				add_order(order, lift.all_external_orders)
+			send_order_message(lift,order)
+			
 
+
+
+		
 
 def receive_message_and_act(lift, port): #will always be run as a thread ALWAYS!
 	while(1):
@@ -57,12 +70,11 @@ def receive_message_and_act(lift, port): #will always be run as a thread ALWAYS!
 				lift.active_lifts[lift_name] = alive
 		elif(message_type == 'Cost'):
 			lift_name, order, cost = decode_cost_message(message)
-			with lock:
+			#with lock:
 				
 
 			#add costs to lift.costlist, when list i full, find least cost and
 			#Then send_command_message
-
 		elif(message_type == 'Command'):
 			lift_name, order = decode_command_message(message)
 			with lock:

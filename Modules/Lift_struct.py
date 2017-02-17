@@ -2,6 +2,7 @@ class Lift:
 	def __init__(self, name):
 		self.name = name #corresponds to index in following lists
 		self.is_alive = 1
+		self.stopped = 0
 		self.floor = 0
 		self.direction = 0
 		self.my_orders = []
