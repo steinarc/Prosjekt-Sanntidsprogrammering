@@ -4,7 +4,7 @@ def my_cost(lift, order):
 	return 0
 
 def calculate_cost(lift, order):
-	return 0
+	return 2
 
 def find_lift_with_minimal_cost(lift):
 	minimal = lift.costlist[lift.name]

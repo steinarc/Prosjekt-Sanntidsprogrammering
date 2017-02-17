@@ -48,7 +48,7 @@ def listen_external_buttons_and_send_order(lift,port,button_queue):
 			order = button_queue.get()
 			with lock:
 				add_order(order, lift.all_external_orders)
-			lift.costlist[lift.name] = calculate_cost(order)
+				lift.costlist[lift.name] = calculate_cost(lift,order)
 			send_order_message(lift,order)
 
 
