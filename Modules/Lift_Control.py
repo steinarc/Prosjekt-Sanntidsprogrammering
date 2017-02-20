@@ -58,7 +58,7 @@ def listen_external_buttons_and_send_order(lift,port,button_queue):
 		
 
 def receive_message_and_act(lift, port): #will always be run as a thread ALWAYS!
-	while(1):
+	while(lift.stopped):
 		message = receive_and_confirm(lift, port) # The function will wait here until something is received
 		message_type = classify_message(message)
 
@@ -75,7 +75,7 @@ def receive_message_and_act(lift, port): #will always be run as a thread ALWAYS!
 				lift.active_lifts[lift_name] = alive
 		
 		elif(message_type == 'Cost'):
-			print("Order message received")
+			print("Cost message received")
 			lift_name, order, cost = decode_cost_message(message)
 			print(message)
 			#with lock:

@@ -57,11 +57,11 @@ def receive_and_confirm(lift, port):
 	sock_receive = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 	sock_receive.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) #!!!!!!!TEST!!!!!!!!!
 	sock_receive.bind(('', port))	
-
+	sock_receive.setblocking(0)
 
 	data = ''	
 	data, addr = sock_receive.recvfrom(1024)
-	#sock_receive.setblocking(0)
+	
 
 	if (len(data) > 0 and (data[0]).isdigit() == 1):
 		remote_ip = lift.ip_list[int(data[0])]
