@@ -25,8 +25,10 @@ def orders_are_equal(order1, order2):
 		return False
 
 def order_index_in_list(order, orderlist):
+	value = -1
 	for i in range (0, len(orderlist)):
 		if (orders_are_equal(order, orderlist[i])):
-			return i
-	print("Order is not in list")
-	return -1
+			value = i
+	if (value == -1):
+		print("Order is not in list")
+	return value

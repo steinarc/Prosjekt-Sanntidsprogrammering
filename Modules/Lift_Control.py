@@ -32,8 +32,8 @@ def lift_go_to_floor(lift, floor, timeout):
 def execute_order(lift):
 	if (len(lift.my_orders) > 0):
 		lift_go_to_floor(lift, lift.my_orders[0].floor, 0)
-		if (lift.floor == lift.my_orders[0].floor and lift.direction == lift.order[0].direction):
-			send_executed_message(lift,order)
+		if (lift.floor == lift.my_orders[0].floor):
+			send_executed_message(lift,lift.my_orders[0])
 			set_external_lamp(lift.my_orders[0],0)
 			with lock:
 				lift.my_orders.pop(0)
@@ -76,6 +76,7 @@ def respond_to_message(lift,received_messages_queue):
 			if (message_type == 'Order'):
 				print("Order message received")
 				sending_lift, order = decode_order_message(message)
+				add_order(order, lift.all_external_orders)
 				cost = calculate_cost(lift, order)
 				send_cost_message(lift, order, sending_lift)
 		
@@ -109,6 +110,7 @@ def respond_to_message(lift,received_messages_queue):
 				with lock:
 					add_order(order, lift.my_orders)
 			elif(message_type == 'Executed'):
+				print("Executed message received")
 				lift_name, order = decode_executed_message(message)
 				set_external_lamp(order, 0)
 				index = order_index_in_list(order, lift.all_external_orders)
