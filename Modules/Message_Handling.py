@@ -47,6 +47,7 @@ def classify_message(message_string):
 			return '0'
 	else:
 		print("No message to decode")
+		return '0'
 
 
 

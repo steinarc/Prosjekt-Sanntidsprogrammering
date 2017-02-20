@@ -67,11 +67,13 @@ def receive_message_and_act(lift, port): #will always be run as a thread ALWAYS!
 			sending_lift, order = decode_order_message(message)
 			cost = calculate_cost(lift, order)
 			send_cost_message(lift, order, sending_lift)
+		
 		elif(message_type == 'Alive'):
 			print("Alive message received")
 			lift_name, alive = decode_Im_alive_message(message)
 			with lock:
 				lift.active_lifts[lift_name] = alive
+		
 		elif(message_type == 'Cost'):
 			print("Order message received")
 			lift_name, order, cost = decode_cost_message(message)

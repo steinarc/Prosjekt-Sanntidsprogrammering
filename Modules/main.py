@@ -21,6 +21,8 @@ def main():
 	thread_receive_message.start()
 	thread_send_orders.start()
 
+	while(1):
+		execute_order(lift)
 
 
 

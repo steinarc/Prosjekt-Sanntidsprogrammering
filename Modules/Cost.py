@@ -8,6 +8,7 @@ def calculate_cost(lift, order):
 
 def find_lift_with_minimal_cost(lift):
 	minimal = lift.costlist[lift.name]
+	lift_name = 0
 	for i in range (0,3):
 		if (lift.active_lifts[i] == 1):
 			if (lift.costlist[i] < minimal and lift.costlist[i] != -1):
