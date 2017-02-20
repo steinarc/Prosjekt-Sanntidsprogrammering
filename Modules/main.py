@@ -6,7 +6,7 @@ from Message_Handling import *
 def main():
 	lift = Lift(0)
 	driver.elev_init()
-	lift.ip_list = ['129.241.187.151', '129.241.187.153', '129.241.187.148']
+	lift.ip_list = ['129.241.187.46', '129.241.187.153', '129.241.187.148']
 	lift.active_lifts = [1, 1, 0]
 	button_queue = Queue.Queue()
 
@@ -20,9 +20,6 @@ def main():
 	thread_receive_message.start()
 	thread_send_orders.start()
 
-
-
-	#send_and_spam_until_confirmation('10.22.69.248', 20018, b'Hei sveis')
 
 
 
