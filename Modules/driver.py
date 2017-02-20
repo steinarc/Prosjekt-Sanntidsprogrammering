@@ -70,8 +70,9 @@ def lift_find_floor(lift):
 
 def lift_move_direction(lift, direction):
 	driver.elev_set_motor_direction(direction)
-	with lock:
-		lift.direction = direction	
+	if (direction != 0):
+		with lock:
+			lift.direction = direction	
 
 def lift_stop(lift):
 	lift_move_direction(lift, 0)

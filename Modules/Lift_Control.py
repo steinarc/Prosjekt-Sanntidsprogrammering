@@ -32,9 +32,11 @@ def lift_go_to_floor(lift, floor, timeout):
 def execute_order(lift):
 	if (len(lift.my_orders) > 0):
 		lift_go_to_floor(lift, lift.my_orders[0].floor, 0)
-		with lock:
+		if (lift.floor == lift.my_orders[0].floor and lift.direction == lift.order[0].direction):
+			send_executed_message(lift,order)
 			set_external_lamp(lift.my_orders[0],0)
-			lift.my_orders.pop(0)
+			with lock:
+				lift.my_orders.pop(0)
 
 
 #driver.elev_set_floor_indicator(3), viser hvor vi er.
@@ -51,8 +53,6 @@ def listen_external_buttons_and_send_order(lift,port,button_queue):
 				add_order(order, lift.all_external_orders)
 				lift.costlist[lift.name] = calculate_cost(lift,order)
 			send_order_message(lift,order)
-
-
 
 
 
@@ -110,6 +110,7 @@ def respond_to_message(lift,received_messages_queue):
 					add_order(order, lift.my_orders)
 			elif(message_type == 'Executed'):
 				lift_name, order = decode_executed_message(message)
+				set_external_lamp(order, 0)
 				index = order_index_in_list(order, lift.all_external_orders)
 				if (index > 0):
 					with lock:
