@@ -63,10 +63,13 @@ def receive_message(lift, port, received_messages_queue): #will always be run as
 		with lock:
 			received_messages_queue.put(message)
 
+
+
 def respond_to_message(lift,received_messages_queue):
 	while(1):
 		if (received_messages_queue.empty() == 0):
 
+			message = received_messages_queue.get()
 			message_type = classify_message(message)
 
 			if (message_type == 'Order'):
@@ -87,8 +90,14 @@ def respond_to_message(lift,received_messages_queue):
 				print(message)
 				#with lock:
 				lift.costlist[lift_name] = cost	 ##Do this for both elevators!!!!
-				lift_with_minimal_cost_name = find_lift_with_minimal_cost(lift)
-				send_command_message(lift, order, lift_with_minimal_cost_name)
+				if (costlist_is_full(lift)):
+					lift_with_minimal_cost_name = find_lift_with_minimal_cost(lift)
+					if (lift_with_minimal_cost_name == lift.name):
+						with lock:
+							add_order(order, lift.my_orders)
+					else:
+						send_command_message(lift, order, lift_with_minimal_cost_name)
+					lift.costlist = [-1, -1, -1]
 
 				#add costs to lift.costlist, when list i full, find least cost and
 				#Then send_command_message
