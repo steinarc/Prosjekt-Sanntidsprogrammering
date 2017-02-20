@@ -33,6 +33,7 @@ def execute_order(lift):
 	if (len(lift.my_orders) > 0):
 		lift_go_to_floor(lift, lift.my_orders[0].floor, 0)
 		with lock:
+			set_external_lamp(lift.my_orders[0],0)
 			lift.my_orders.pop(0)
 
 
@@ -97,6 +98,7 @@ def respond_to_message(lift,received_messages_queue):
 							add_order(order, lift.my_orders)
 					else:
 						send_command_message(lift, order, lift_with_minimal_cost_name)
+					set_external_lamp(order, 1)	
 					lift.costlist = [-1, -1, -1]
 
 				#add costs to lift.costlist, when list i full, find least cost and
@@ -114,6 +116,18 @@ def respond_to_message(lift,received_messages_queue):
 						lift.all_external_orders.pop(index)
 					print("Order successfully removed")
 				
+
+#driver.elev_set_floor_indicator(3), viser hvor vi er.
+#driver.elev_set_button_lamp(button, floor, value), button: 0 = OPP, 1 = NED, 2 = HEISPANEL, value = AV/PA, 0/1
+#driver.elev_set_door_open_lamp(0) #, DOR APEN
+
+def set_external_lamp(order, value):
+	button = 0
+	if (order.direction == 1):
+		button = 0
+	elif (order.direction == -1):
+		button = 1
+	driver.elev_set_button_lamp(button, order.floor, value)
 
 	# Ta hensyn til hvilken type melding dette er.
 	#hvis dette er en ordremelding. regn ut cost og send tilbake din cost
