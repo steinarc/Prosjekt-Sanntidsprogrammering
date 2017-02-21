@@ -41,10 +41,11 @@ def send_and_spam_until_confirmation(remote_ip, port, data):
 	
 	confirmation = return_queue.get()	
 	sock_send.close() #Fjern dette om feil plutselig oppstaar
-	if (confirmation == '0'):
-		print ("My friend has died")
-	else:
+	if(confirmation == remote_ip):
 		print("Message sent and my friend is still alive")
+	else:
+		print ("My friend has died " + remote_ip)
+	
 
 #Denne funksjonen ble laget fordi naar en heis mottar en melding vet vi
 #ikke paa forhaand hvem som sendte den, det staar i selve meldinga
@@ -63,7 +64,7 @@ def receive_and_confirm(lift, port):
 
 	if (len(data) > 0 and (data[0]).isdigit() == 1):
 		remote_ip = lift.ip_list[int(data[0])]
-		sock_send.sendto('1', (remote_ip, port + 1))
+		sock_send.sendto(lift.ip_list[lift.name], (remote_ip, port + 1))
 		sock_send.close()
 		sock_receive.close()
 		return (data)
