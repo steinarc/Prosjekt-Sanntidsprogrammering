@@ -61,7 +61,6 @@ def receive_and_confirm(lift, port):
 
 	data = ''	
 	data, addr = sock_receive.recvfrom(1024)
-	
 
 	if (len(data) > 0 and (data[0]).isdigit() == 1):
 		remote_ip = lift.ip_list[int(data[0])]

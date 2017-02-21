@@ -90,8 +90,8 @@ def respond_to_message(lift,received_messages_queue):
 				print("Cost message received")
 				lift_name, order, cost = decode_cost_message(message)
 				print(message)
-				#with lock:
-				lift.costlist[lift_name] = cost	 ##Do this for both elevators!!!!
+				with lock:
+					lift.costlist[lift_name] = cost	 ##Do this for both elevators!!!!
 				if (costlist_is_full(lift)):
 					lift_with_minimal_cost_name = find_lift_with_minimal_cost(lift)
 					if (lift_with_minimal_cost_name == lift.name):
@@ -99,8 +99,9 @@ def respond_to_message(lift,received_messages_queue):
 							add_order(order, lift.my_orders)
 					else:
 						send_command_message(lift, order, lift_with_minimal_cost_name)
-					set_external_lamp(order, 1)	
-					lift.costlist = [-1, -1, -1]
+					set_external_lamp(order, 1)
+					with lock:	
+						lift.costlist = [-1, -1, -1]
 
 				#add costs to lift.costlist, when list i full, find least cost and
 				#Then send_command_message
