@@ -54,7 +54,10 @@ def listen_external_buttons_and_send_order(lift,port,button_queue):
 				lift.costlist[lift.name] = calculate_cost(lift,order)
 			send_order_message(lift,order)
 
-
+def broadcast_aliveness(lift,order):
+	while(1):
+		send_Im_alive_message(lift, order)
+		sleep(1)
 
 		
 

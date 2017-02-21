@@ -17,12 +17,14 @@ def main():
 	thread_receive_message = Thread(target = receive_message, args = (lift, 20018,received_messages_queue))
 	thread_respond_to_message = Thread(target = respond_to_message, args = (lift, received_messages_queue))
 	thread_send_orders = Thread(target = listen_external_buttons_and_send_order, args = (lift,20018, button_queue))
+	#thread_broadcast_aliveness = Thread(target = broadcast_aliveness, args = (lift, order))
 	
 	thread_lift_find_floor.start()
 	thread_listen_buttons.start() 
 	thread_receive_message.start()
 	thread_respond_to_message.start()
 	thread_send_orders.start()
+	#thread_broadcast_aliveness.start()
 
 	while(1):
 		execute_order(lift)
