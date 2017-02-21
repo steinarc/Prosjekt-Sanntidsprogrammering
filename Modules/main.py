@@ -4,9 +4,9 @@ from Message_Handling import *
 
 
 def main():
-	lift = Lift(0)
+	lift = Lift(2)
 	driver.elev_init()
-	lift.ip_list = ['129.241.187.157', '129.241.187.145', '129.241.187.151']
+	lift.ip_list = ['129.241.187.145', '129.241.187.153', '129.241.187.151']
 	lift.costlist = [-1, -1, -1]
 	lift.active_lifts = [1, 1, 1]
 	button_queue = Queue.Queue()

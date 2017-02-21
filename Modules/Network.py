@@ -40,7 +40,6 @@ def send_and_spam_until_confirmation(remote_ip, port, data):
 		time.sleep(0.1)
 	
 	confirmation = return_queue.get()	
-	print(confirmation)
 	sock_send.close() #Fjern dette om feil plutselig oppstaar
 	if (confirmation == '0'):
 		print ("My friend has died")

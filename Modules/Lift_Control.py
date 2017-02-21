@@ -71,6 +71,7 @@ def respond_to_message(lift,received_messages_queue):
 		if (received_messages_queue.empty() == 0):
 
 			message = received_messages_queue.get()
+			print(message)
 			message_type = classify_message(message)
 
 			if (message_type == 'Order'):
@@ -89,9 +90,8 @@ def respond_to_message(lift,received_messages_queue):
 			elif(message_type == 'Cost'):
 				print("Cost message received")
 				lift_name, order, cost = decode_cost_message(message)
-				print(message)
 				with lock:
-					lift.costlist[lift_name] = cost	 ##Do this for both elevators!!!!
+					lift.costlist[lift_name] = cost
 				if (costlist_is_full(lift)):
 					lift_with_minimal_cost_name = find_lift_with_minimal_cost(lift)
 					if (lift_with_minimal_cost_name == lift.name):
@@ -103,13 +103,12 @@ def respond_to_message(lift,received_messages_queue):
 					with lock:	
 						lift.costlist = [-1, -1, -1]
 
-				#add costs to lift.costlist, when list i full, find least cost and
-				#Then send_command_message
 			elif(message_type == 'Command'):
 				print("Command message received")
 				lift_name, order = decode_command_message(message)
 				with lock:
 					add_order(order, lift.my_orders)
+
 			elif(message_type == 'Executed'):
 				print("Executed message received")
 				lift_name, order = decode_executed_message(message)
