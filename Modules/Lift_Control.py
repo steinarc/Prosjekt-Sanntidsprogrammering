@@ -15,14 +15,14 @@ def lift_go_to_floor(lift, floor, timeout):
 			lift_stop(lift)
 			break
 
-		if (prev_floor != lift.floor):
-			if (lift.floor == floor):
+		else:
+			if (lift.floor == floor and driver.elev_get_floor_sensor_signal() == floor ):
 				lift_stop(lift)
 				driver.elev_set_door_open_lamp(1)
 				time.sleep(2)
 				driver.elev_set_door_open_lamp(0)
 				break
-			elif (lift.floor < floor):
+			if (lift.floor < floor):
 				lift_move_direction(lift, 1)
 			else:
 				lift_move_direction(lift, -1)
