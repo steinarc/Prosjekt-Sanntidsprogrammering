@@ -14,22 +14,34 @@ driver = CDLL("./../driver/libdriver.so")
 
 def lift_go_to_floor(lift, floor, timeout):
 	prev_floor = -1
+	motor_is_set = 0
+	declared_dead = 0
+	starttime = time.time()
 	while(1):
 		if (lift.stopped == 1):
 			lift_stop(lift)
 			break
-
 		else:
 			if (lift.floor == floor and driver.elev_get_floor_sensor_signal() == floor ):
 				lift_stop(lift)
 				driver.elev_set_door_open_lamp(1)
 				time.sleep(2)
 				driver.elev_set_door_open_lamp(0)
+				lift.is_alive = 1
 				break
-			if (lift.floor < floor):
+			if (lift.floor < floor and (motor_is_set == 0)):
 				lift_move_direction(lift, 1)
-			else:
+				motor_is_set = 1
+				starttime = time.time()
+			elif (lift.floor > floor and motor_is_set == 0):
 				lift_move_direction(lift, -1)
+				motor_is_set = 1
+				starttime = time.time()
+			if (time.time() - starttime > 10 and declared_dead == 0):
+				print("I am dead")
+				lift.is_alive = 0
+				declared_dead = 1
+
 			prev_floor = lift.floor
 
 
@@ -134,13 +146,3 @@ def respond_to_message(lift,received_messages_queue):
 					with lock:
 						lift.all_external_orders.pop(index)
 					print("Order successfully removed")
-				
-
-#driver.elev_set_floor_indicator(3), viser hvor vi er.
-#driver.elev_set_button_lamp(button, floor, value), button: 0 = OPP, 1 = NED, 2 = HEISPANEL, value = AV/PA, 0/1
-#driver.elev_set_door_open_lamp(0) #, DOR APEN
-
-	# Ta hensyn til hvilken type melding dette er.
-	#hvis dette er en ordremelding. regn ut cost og send tilbake din cost
-	#Hvis dette er en im alive-melding sett Is_alive
-	#Hvis dette er en Cost-melding legg til i costlist
