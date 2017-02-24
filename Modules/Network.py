@@ -3,9 +3,8 @@ import select
 import time
 import Queue
 from Lift_struct import *
-from Queue_module import *
-from driver import *
 from threading import Thread
+from Lock_Manager import lock
 
 PORT = 20298
 

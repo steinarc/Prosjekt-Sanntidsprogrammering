@@ -1,10 +1,14 @@
 import time
-from threading import Thread, Lock
+from ctypes import *
+from threading import Thread
 from Lift_struct import *
-from Queue_module import *
-from driver import *
-from Message_Handling import *
-from Network import *
+from Queue_module import add_order_external_list, add_order_internal_list, order_index_in_list
+from driver import lift_move_direction, set_external_lamp, set_internal_lamp, lift_stop
+from Message_Handling import send_order_message, send_cost_message, send_command_message, send_executed_message, send_Im_alive_message, classify_message
+from Network import receive_and_confirm
+from Lock_Manager import lock
+from Cost import calculate_cost
+from File_Module import delete_order_from_file
 
 driver = CDLL("./../driver/libdriver.so")
 
@@ -36,8 +40,10 @@ def execute_order(lift):
 			send_executed_message(lift,lift.my_orders[0])
 			set_external_lamp(lift.my_orders[0],0)
 			set_internal_lamp(lift.my_orders[0],0)
+			delete_order_from_file(lift.my_orders[0])
 			with lock:
 				lift.my_orders.pop(0)
+
 
 
 #driver.elev_set_floor_indicator(3), viser hvor vi er.
@@ -46,14 +52,20 @@ def execute_order(lift):
 
 def listen_external_buttons_and_send_order(lift,port,button_queue):
 	while(1):
+		order_sent_successfully = False
 		if (lift.stopped == 1): #Does not work right after
 			break
 		if (button_queue.empty() == 0):
 			order = button_queue.get()
+			add_order_external_list(lift, order)
 			with lock:
-				add_order_external_list(lift, order)
 				lift.costlist[lift.name] = calculate_cost(lift,order)
-			send_order_message(lift,order)
+			order_sent_sucessfully = send_order_message(lift,order)
+			if (order_sent_sucessfully == False):
+				add_order_internal_list(lift,order)
+				set_external_lamp(order,1)
+
+
 
 def broadcast_aliveness(lift):
 	while(1):

@@ -1,11 +1,11 @@
 from ctypes import *
-from threading import Thread, RLock
+import time
+from threading import Thread
 from Lift_struct import *
-from Lift_Control import *
+from Lock_Manager import lock
+from Queue_module import add_order_internal_list
 
 driver = CDLL("./../driver/libdriver.so")
-
-lock = RLock()
 
 def listen_button(button_type, floor, lift, button_queue): #type: 0 = up, 1 = down, 2 = internal
 	direction = 0

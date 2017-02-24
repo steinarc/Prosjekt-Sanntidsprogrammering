@@ -1,4 +1,6 @@
 from Lift_struct import *
+from File_Module import append_to_file
+from Lock_Manager import lock
 
 def add_order_external_list(lift, order):
 	i = 0
@@ -10,7 +12,8 @@ def add_order_external_list(lift, order):
 
 	direction = 0;
 	if (i == len(lift.all_external_orders)):
-		lift.all_external_orders.extend([order])
+		with lock:
+			lift.all_external_orders.extend([order])
 
 def add_order_internal_list(lift,order):
 	orderlist = lift.my_orders
@@ -24,7 +27,19 @@ def add_order_internal_list(lift,order):
 
 	direction = 0;
 	if (i == len(orderlist)): #Add the order, sort list
-		lift.my_orders.extend([order])
+
+		if (order.direction == 0):
+			append_to_file(order)
+			with lock:
+				lift.my_orders.extend([order])
+		else:
+			with lock:
+				lift.my_orders.extend([order])
+
+
+
+
+
 #		if (order.direction == 0): #order.direction == 0 means internal order all orders in my_orders will have a direction!!
 #			if (order.floor < lift.floor): #Hvis vi maa ned for aa gjoere ordren
 #				for x in range (0,len(orderlist)):

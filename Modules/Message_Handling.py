@@ -1,7 +1,6 @@
 from Lift_struct import *
-from Network import *
-from Cost import *
-
+from Network import send_and_spam_until_confirmation, PORT
+from Cost import calculate_cost
 # A message is for ex: "0,Order,3 -1"
 # A message is for ex: "0,Alive"
 # A message is for ex: "0,Cost,11"
@@ -9,7 +8,7 @@ from Cost import *
 def send_order_message(lift, order):
 	message = encode_order_message(lift,order)
 	successful_orders_sent = 0
-	success = False
+	success = True
 	for lift_number in range (0,3):
 		if (lift_number != lift.name and lift.active_lifts[lift_number] == 1):
 			success = send_and_spam_until_confirmation(lift, lift_number, PORT, message)
@@ -17,9 +16,8 @@ def send_order_message(lift, order):
 				successful_orders_sent += 1
 
 	if (successful_orders_sent == 0):
-		with lock:
-			add_order_internal_list(lift,order)
-		set_external_lamp(order, 1)
+		success = False
+	return success
 
 
 def send_Im_alive_message(lift):
