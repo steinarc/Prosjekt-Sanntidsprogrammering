@@ -35,6 +35,7 @@ def execute_order(lift):
 		if (lift.floor == lift.my_orders[0].floor):
 			send_executed_message(lift,lift.my_orders[0])
 			set_external_lamp(lift.my_orders[0],0)
+			set_internal_lamp(lift.my_orders[0],0)
 			with lock:
 				lift.my_orders.pop(0)
 
@@ -50,14 +51,14 @@ def listen_external_buttons_and_send_order(lift,port,button_queue):
 		if (button_queue.empty() == 0):
 			order = button_queue.get()
 			with lock:
-				add_order(order, lift.all_external_orders)
+				add_order_external_list(lift, order)
 				lift.costlist[lift.name] = calculate_cost(lift,order)
 			send_order_message(lift,order)
 
-def broadcast_aliveness(lift,order):
+def broadcast_aliveness(lift):
 	while(1):
-		send_Im_alive_message(lift, order)
-		sleep(1)
+		send_Im_alive_message(lift)
+		time.sleep(1)
 
 		
 
@@ -80,7 +81,7 @@ def respond_to_message(lift,received_messages_queue):
 			if (message_type == 'Order'):
 				print("Order message received")
 				sending_lift, order = decode_order_message(message)
-				add_order(order, lift.all_external_orders)
+				add_order_external_list(lift, order)
 				cost = calculate_cost(lift, order)
 				send_cost_message(lift, order, sending_lift)
 		
@@ -99,7 +100,7 @@ def respond_to_message(lift,received_messages_queue):
 					lift_with_minimal_cost_name = find_lift_with_minimal_cost(lift)
 					if (lift_with_minimal_cost_name == lift.name):
 						with lock:
-							add_order(order, lift.my_orders)
+							add_order_internal_list(lift, order)
 					else:
 						send_command_message(lift, order, lift_with_minimal_cost_name)
 					set_external_lamp(order, 1)
@@ -110,7 +111,7 @@ def respond_to_message(lift,received_messages_queue):
 				print("Command message received")
 				lift_name, order = decode_command_message(message)
 				with lock:
-					add_order(order, lift.my_orders)
+					add_order_internal_list(lift, order)
 
 			elif(message_type == 'Executed'):
 				print("Executed message received")
@@ -126,14 +127,6 @@ def respond_to_message(lift,received_messages_queue):
 #driver.elev_set_floor_indicator(3), viser hvor vi er.
 #driver.elev_set_button_lamp(button, floor, value), button: 0 = OPP, 1 = NED, 2 = HEISPANEL, value = AV/PA, 0/1
 #driver.elev_set_door_open_lamp(0) #, DOR APEN
-
-def set_external_lamp(order, value):
-	button = 0
-	if (order.direction == 1):
-		button = 0
-	elif (order.direction == -1):
-		button = 1
-	driver.elev_set_button_lamp(button, order.floor, value)
 
 	# Ta hensyn til hvilken type melding dette er.
 	#hvis dette er en ordremelding. regn ut cost og send tilbake din cost

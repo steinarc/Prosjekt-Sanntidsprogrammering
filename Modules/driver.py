@@ -15,15 +15,14 @@ def listen_button(button_type, floor, lift, button_queue): #type: 0 = up, 1 = do
 			if (button_type == 2):
 				order = Order(floor, 0) #direction = 0 for internal order
 				with lock:
-					add_order(order, lift.my_orders)
+					add_order_internal_list(lift, order)
+				set_internal_lamp(order, 1)
 			else:
 				if (button_type == 0):
 					direction = 1
 				elif (button_type == 1):
 					direction = -1
 				order = Order(floor, direction)
-				#with lock:
-				#	add_order(order, lift.all_external_orders)
 				with lock:
 					button_queue.put(order)			
 			time.sleep(1)
@@ -76,3 +75,16 @@ def lift_move_direction(lift, direction):
 
 def lift_stop(lift):
 	lift_move_direction(lift, 0)
+
+
+def set_external_lamp(order, value):
+	button = 0
+	if (order.direction == 1):
+		button = 0
+	elif (order.direction == -1):
+		button = 1
+	driver.elev_set_button_lamp(button, order.floor, value)
+
+def set_internal_lamp(order, value):
+	button = 2
+	driver.elev_set_button_lamp(button, order.floor, value)

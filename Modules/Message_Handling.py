@@ -8,34 +8,39 @@ from Cost import *
 
 def send_order_message(lift, order):
 	message = encode_order_message(lift,order)
-	for i in range (0,3):
-		if (i != lift.name and lift.active_lifts[i] == 1):
-			remote_ip = lift.ip_list[i]
-			send_and_spam_until_confirmation(remote_ip, PORT, message)
+	successful_orders_sent = 0
+	success = False
+	for lift_number in range (0,3):
+		if (lift_number != lift.name and lift.active_lifts[lift_number] == 1):
+			success = send_and_spam_until_confirmation(lift, lift_number, PORT, message)
+			if (success == True):
+				successful_orders_sent += 1
 
-def send_Im_alive_message(lift, order):
+	if (successful_orders_sent == 0):
+		with lock:
+			add_order_internal_list(lift,order)
+		set_external_lamp(order, 1)
+
+
+def send_Im_alive_message(lift):
 	message = encode_Im_alive_message(lift)
-	for i in range (0,3):
-		if (i != lift.name and lift.active_lifts[i] == 1):
-			remote_ip = lift.ip_list[i]
-			send_and_spam_until_confirmation(remote_ip, PORT, message)
+	for lift_number in range (0,3):
+		if (lift_number != lift.name):
+			send_and_spam_until_confirmation(lift, lift_number, PORT, message)
 
 def send_cost_message(lift, order, external_lift_number):
 	message = encode_cost_message(lift, order)
-	remote_ip = lift.ip_list[external_lift_number]
-	send_and_spam_until_confirmation(remote_ip, PORT, message)
+	send_and_spam_until_confirmation(lift, external_lift_number, PORT, message)
 
 def send_command_message(lift, order, external_lift_number):
 	message = encode_command_message(lift, order)
-	remote_ip = lift.ip_list[external_lift_number]
-	send_and_spam_until_confirmation(remote_ip, PORT, message)
+	send_and_spam_until_confirmation(lift, external_lift_number, PORT, message)
 
 def send_executed_message(lift, order):
 	message = encode_executed_message(lift, order)
-	for i in range (0,3):
-		if (i != lift.name and lift.active_lifts[i] == 1):
-			remote_ip = lift.ip_list[i]
-			send_and_spam_until_confirmation(remote_ip, PORT, message)	
+	for lift_number in range (0,3):
+		if (lift_number != lift.name and lift.active_lifts[lift_number] == 1):
+			send_and_spam_until_confirmation(lift, lift_number, PORT, message)	
 
 def classify_message(message_string):
 	if (message_string != '0'):

@@ -4,9 +4,10 @@ import time
 import Queue
 from Lift_struct import *
 from Queue_module import *
+from driver import *
 from threading import Thread
 
-PORT = 20018
+PORT = 20298
 
 def receive(port, timeout, return_queue):
 	sock_receive = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -22,13 +23,15 @@ def receive(port, timeout, return_queue):
 		print("Nothing was received")	
 
 	return_queue.put(data)
-	sock_receive.close() #This is new, so remove hvis feil oppstaar
+	sock_receive.close()
 	return data
 
-def send_and_spam_until_confirmation(remote_ip, port, data):
+def send_and_spam_until_confirmation(lift, other_lift, port, data):
 
+	remote_ip = lift.ip_list[other_lift]
 	sock_send = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
+	success = False
 	confirmation = '0'
 
 	return_queue = Queue.Queue() #Use queue to get the return value of the thread
@@ -42,10 +45,14 @@ def send_and_spam_until_confirmation(remote_ip, port, data):
 	confirmation = return_queue.get()	
 	sock_send.close() #Fjern dette om feil plutselig oppstaar
 	if(confirmation == remote_ip):
-		print("Message sent and my friend is still alive")
+		print("Message sent and " + str(other_lift) + "is still alive")
+		success = True
 	else:
-		print ("My friend has died " + remote_ip)
-	
+		print ("My friend " + str(other_lift) + " is dead")
+		with lock:
+			lift.active_lifts[other_lift] = 0
+		success = False
+	return success
 
 #Denne funksjonen ble laget fordi naar en heis mottar en melding vet vi
 #ikke paa forhaand hvem som sendte den, det staar i selve meldinga
@@ -55,7 +62,7 @@ def receive_and_confirm(lift, port):
 
 	sock_send = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 	sock_receive = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-	sock_receive.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) #!!!!!!!TEST!!!!!!!!!
+	sock_receive.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) #Testing binding from multiple places
 	sock_receive.bind(('', port))	
 	#sock_receive.setblocking(0)
 
