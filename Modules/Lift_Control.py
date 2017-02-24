@@ -134,6 +134,7 @@ def respond_to_message(lift,received_messages_queue):
 			elif(message_type == 'Command'):
 				print("Command message received")
 				lift_name, order = decode_command_message(message)
+				set_external_lamp(order, 1)
 				with lock:
 					add_order_internal_list(lift, order)
 

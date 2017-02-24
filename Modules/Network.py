@@ -44,10 +44,10 @@ def send_and_spam_until_confirmation(lift, other_lift, port, data):
 	confirmation = return_queue.get()	
 	sock_send.close() #Fjern dette om feil plutselig oppstaar
 	if(confirmation == remote_ip):
-		print("Message sent and " + str(other_lift) + "is still alive")
+		print("Message sent and " + str(other_lift) + " is still alive")
 		success = True
 	else:
-		print ("My friend " + str(other_lift) + " is dead")
+		print ("My friend " + str(other_lift) + " is a deadlift")
 		with lock:
 			lift.active_lifts[other_lift] = 0
 		success = False
