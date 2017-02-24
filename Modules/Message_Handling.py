@@ -1,9 +1,6 @@
 from Lift_struct import *
 from Network import send_and_spam_until_confirmation, PORT
 from Cost import calculate_cost
-# A message is for ex: "0,Order,3 -1"
-# A message is for ex: "0,Alive"
-# A message is for ex: "0,Cost,11"
 
 def send_order_message(lift, order):
 	message = encode_order_message(lift,order)

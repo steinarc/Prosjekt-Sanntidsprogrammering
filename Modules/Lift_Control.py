@@ -2,12 +2,12 @@ import time
 from ctypes import *
 from threading import Thread
 from Lift_struct import *
-from Queue_module import add_order_external_list, add_order_internal_list, order_index_in_list
+from Order_Module import add_order_external_list, add_order_internal_list, order_index_in_list
 from driver import lift_move_direction, set_external_lamp, set_internal_lamp, lift_stop
-from Message_Handling import send_order_message, send_cost_message, send_command_message, send_executed_message, send_Im_alive_message, classify_message
+from Message_Handling import *
 from Network import receive_and_confirm
 from Lock_Manager import lock
-from Cost import calculate_cost
+from Cost import calculate_cost, costlist_is_full, find_lift_with_minimal_cost
 from File_Module import delete_order_from_file
 
 driver = CDLL("./../driver/libdriver.so")

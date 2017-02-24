@@ -3,7 +3,7 @@ import time
 from threading import Thread
 from Lift_struct import *
 from Lock_Manager import lock
-from Queue_module import add_order_internal_list
+from Order_Module import add_order_internal_list
 
 driver = CDLL("./../driver/libdriver.so")
 

@@ -5,13 +5,16 @@ from driver import lift_find_floor, listen_all_buttons
 from Lift_struct import *
 from Network import PORT
 
+from Order_Module import print_orderlist
+
+from File_Module import read_order_list_from_file
+
 
 def main():
 	lift = Lift(2)
 	driver.elev_init()
 	lift.ip_list = ['129.241.187.145', '129.241.187.153', '129.241.187.151']
-	lift.costlist = [-1, -1, -1]
-	lift.active_lifts = [1, 1, 1]
+	lift.my_orders = read_order_list_from_file()
 	button_queue = Queue.Queue()
 	received_messages_queue = Queue.Queue()
 
@@ -35,3 +38,9 @@ def main():
 
 
 main()
+
+
+#1. Does the elevator reach where its supposed to go in time?
+#2. Check whether lists are equal
+#3. when an elevator dies, distribute orders between remaining elevators
+#4. Find out why some messages are received twice
