@@ -2,7 +2,7 @@ import time
 from ctypes import *
 from threading import Thread
 from Lift_struct import *
-from Order_Module import add_order_external_list, add_order_internal_list, order_index_in_list
+from Order_Module import add_order_external_list, add_order_to_my_orders, order_index_in_list, print_orderlist
 from driver import lift_move_direction, set_external_lamp, set_internal_lamp, lift_stop
 from Message_Handling import *
 from Network import receive_and_confirm
@@ -53,6 +53,10 @@ def execute_order(lift):
 			set_external_lamp(lift.my_orders[0],0)
 			set_internal_lamp(lift.my_orders[0],0)
 			delete_order_from_file(lift.my_orders[0])
+			index = order_index_in_list(lift.my_orders[0], lift.all_external_orders)
+			if (index != -1):
+				with lock:
+					lift.all_external_orders.pop(index)
 			with lock:
 				lift.my_orders.pop(0)
 
@@ -74,15 +78,27 @@ def listen_external_buttons_and_send_order(lift,port,button_queue):
 				lift.costlist[lift.name] = calculate_cost(lift,order)
 			order_sent_sucessfully = send_order_message(lift,order)
 			if (order_sent_sucessfully == False):
-				add_order_internal_list(lift,order)
+				print("List of orders:")
+				print_orderlist(lift.all_external_orders)
+				add_order_to_my_orders(lift,order)
 				set_external_lamp(order,1)
 
 
 
-def broadcast_aliveness(lift):
+def broadcast_aliveness_and_check_friends(lift):
+	prev_active_lifts = lift.active_lifts
 	while(1):
 		send_Im_alive_message(lift)
-		time.sleep(1)
+		active_lifts = lift.active_lifts
+		if (prev_active_lifts != active_lifts): #If a lift has died or resurrected
+			for i in range (0, 3):
+				if (i != lift.name):
+					if (prev_active_lifts[i] == 1 and active_lifts[i] == 0):
+						if ((i + 1) % 3 == lift.name): #2 is backup for 1, 1 is backup for 0 and 0 for 2
+							for x in range (0, len(lift.all_external_orders)):
+								add_order_to_my_orders(lift, lift.all_external_orders[x])
+	time.sleep(1)
+
 
 		
 
@@ -124,7 +140,7 @@ def respond_to_message(lift,received_messages_queue):
 					lift_with_minimal_cost_name = find_lift_with_minimal_cost(lift)
 					if (lift_with_minimal_cost_name == lift.name):
 						with lock:
-							add_order_internal_list(lift, order)
+							add_order_to_my_orders(lift, order)
 					else:
 						send_command_message(lift, order, lift_with_minimal_cost_name)
 					set_external_lamp(order, 1)
@@ -136,14 +152,14 @@ def respond_to_message(lift,received_messages_queue):
 				lift_name, order = decode_command_message(message)
 				set_external_lamp(order, 1)
 				with lock:
-					add_order_internal_list(lift, order)
+					add_order_to_my_orders(lift, order)
 
 			elif(message_type == 'Executed'):
 				print("Executed message received")
 				lift_name, order = decode_executed_message(message)
 				set_external_lamp(order, 0)
 				index = order_index_in_list(order, lift.all_external_orders)
-				if (index > 0):
+				if (index != -1):
 					with lock:
 						lift.all_external_orders.pop(index)
 					print("Order successfully removed")

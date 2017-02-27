@@ -3,7 +3,7 @@ import time
 from threading import Thread
 from Lift_struct import *
 from Lock_Manager import lock
-from Order_Module import add_order_internal_list
+from Order_Module import add_order_to_my_orders
 
 driver = CDLL("./../driver/libdriver.so")
 
@@ -15,7 +15,7 @@ def listen_button(button_type, floor, lift, button_queue): #type: 0 = up, 1 = do
 			if (button_type == 2):
 				order = Order(floor, 0) #direction = 0 for internal order
 				with lock:
-					add_order_internal_list(lift, order)
+					add_order_to_my_orders(lift, order)
 				set_internal_lamp(order, 1)
 			else:
 				if (button_type == 0):

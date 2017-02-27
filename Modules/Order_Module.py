@@ -15,7 +15,7 @@ def add_order_external_list(lift, order):
 		with lock:
 			lift.all_external_orders.extend([order])
 
-def add_order_internal_list(lift,order):
+def add_order_to_my_orders(lift,order):
 	orderlist = lift.my_orders
 	i = 0
 	pos = len(orderlist) - 1
