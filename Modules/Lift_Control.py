@@ -97,7 +97,8 @@ def broadcast_aliveness_and_check_friends(lift):
 						if ((i + 1) % 3 == lift.name): #2 is backup for 1, 1 is backup for 0 and 0 for 2
 							for x in range (0, len(lift.all_external_orders)):
 								add_order_to_my_orders(lift, lift.all_external_orders[x])
-	time.sleep(1)
+		prev_active_lifts = lift.active_lifts
+		time.sleep(1)
 
 
 		

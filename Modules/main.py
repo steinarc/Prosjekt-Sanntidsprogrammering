@@ -13,7 +13,7 @@ from File_Module import read_order_list_from_file
 def main():
 	lift = Lift(0)
 	driver.elev_init()
-	lift.ip_list = ['129.241.187.38', '129.241.187.155', '129.241.187.151']
+	lift.ip_list = ['129.241.187.38', '129.241.187.157', '129.241.187.145']
 	lift.my_orders = read_order_list_from_file()
 	button_queue = Queue.Queue()
 	received_messages_queue = Queue.Queue()
