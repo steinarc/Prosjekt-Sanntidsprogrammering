@@ -86,18 +86,20 @@ def listen_external_buttons_and_send_order(lift,port,button_queue):
 
 
 def broadcast_aliveness_and_check_friends(lift):
-	prev_active_lifts = lift.active_lifts
+	prev_active_lifts = [1, 1, 1]	
 	while(1):
 		send_Im_alive_message(lift)
-		active_lifts = lift.active_lifts
-		if (prev_active_lifts != active_lifts): #If a lift has died or resurrected
+		if (prev_active_lifts != lift.active_lifts): #If a lift has died or resurrected
 			for i in range (0, 3):
 				if (i != lift.name):
-					if (prev_active_lifts[i] == 1 and active_lifts[i] == 0):
-						if ((i + 1) % 3 == lift.name): #2 is backup for 1, 1 is backup for 0 and 0 for 2
+					if (prev_active_lifts[i] == 1 and lift.active_lifts[i] == 0):
+						if ((i + 1) % 3 == lift.name or lift.active_lifts[(i+1) % 3] == 0): #2 is backup for 1, 1 is backup for 0 and 0 for 2
 							for x in range (0, len(lift.all_external_orders)):
 								add_order_to_my_orders(lift, lift.all_external_orders[x])
-		prev_active_lifts = lift.active_lifts
+
+		for  i in range(0, 3):
+			prev_active_lifts[i] = lift.active_lifts[i]
+
 		time.sleep(1)
 
 
