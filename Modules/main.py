@@ -9,51 +9,6 @@ from Order_Module import print_orderlist
 
 from File_Module import read_order_list_from_file
 
-def set_ip_list(lift):
-
-	MY_IP = get_my_ip()
-	nr = 0
-
-	if len(lift.ip_list) == 0:
-		with lock:
-			lift.ip_list = [MY_IP]
-			lift.name = nr
-	else:
-		with lock:
-			lift.ip_list = lift.ip_list + [MY_IP]
-			nr = nr + 1
-			lift.name = nr
-
-	with lock:
-		sorter(lift.ip_list)
-		
-
-
-def sorter(lst):
-	new_list = []
-	n = 0
-	for index in range (len(lst)):
-		for i in range (len(lst[index])):
-			if lst[index][i] == '.':
-				n += 1
-				if n == 3:
-					num = lst[index][i + 1] + lst[index][i + 2] 
-					num = int(num)
-					if len(lst[index]) == 15:
-						num = lst[index][i + 1] + lst[index][i + 2] + lst[index][i + 3]
-						num = int(num)
-					new_list = new_list + [num]  
-
-		n = 0
-
-	for passesLeft in range(len(lst) - 1, 0, -1):
-		for index in range(passesLeft):
-			if new_list[index] > new_list[index + 1]:
-				new_list[index], new_list[index + 1] = new_list[index + 1], new_list[index]
-				lst[index], lst[index + 1] = lst[index + 1], lst[index]
-
-
-
 
 def main():
 	lift = Lift(0)
