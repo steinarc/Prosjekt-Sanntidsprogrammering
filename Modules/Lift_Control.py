@@ -1,11 +1,12 @@
 import time
+import Queue
 from ctypes import *
 from threading import Thread
 from Lift_struct import *
 from Order_Module import add_order_to_all_external_orders, add_order_to_my_orders, order_index_in_list, print_orderlist
 from driver import lift_move_direction, set_external_lamp, set_internal_lamp, lift_stop
 from Message_Handling import *
-from Network import receive_and_confirm
+from Network import receive_and_confirm, set_ip_list, broadcast_my_IP, receive, get_my_ip, PORT, receive_IP
 from Lock_Manager import lock
 from Cost import calculate_cost, costlist_is_full, find_lift_with_minimal_cost
 from File_Module import delete_order_from_file
@@ -13,6 +14,37 @@ from File_Module import delete_order_from_file
 driver = CDLL("./../driver/libdriver.so")
 
 #Interface functions
+
+def init():
+	
+	lift = Lift(0)
+	MY_IP = get_my_ip()
+	lift.ip_list = ['129.241.187.156', '129.241.187.160']
+
+	queue = Queue.Queue()
+	driver.elev_init()
+
+	thread_broadcast = Thread(target = broadcast_my_IP, args = (lift, PORT))
+	thread_receive = Thread(target = receive_IP, args = (lift, PORT, queue))
+	#thread_list = Thread(target = set_ip_list, args = (lift, queue))
+
+	thread_receive.start()
+	thread_broadcast.start()
+	#thread_list.start()
+
+	while (len(lift.ip_list) != 3):
+		set_ip_list(lift, queue)
+
+	thread_receive.join()
+	thread_broadcast.join()
+
+	for n in range (len(lift.ip_list)):
+		if (lift.ip_list[n] == MY_IP):
+			with lock:
+				lift.name = n
+
+	return lift
+
 
 def execute_order(lift):
 	if (len(lift.my_orders) > 0):

@@ -1,19 +1,30 @@
 import Queue
 from threading import Thread
-from Lift_Control import receive_message, respond_to_message, do_work_based_on_button_press, broadcast_aliveness_and_check_aliveness_of_friends, driver, execute_order
+from Lift_Control import receive_message, respond_to_message, do_work_based_on_button_press, broadcast_aliveness_and_check_aliveness_of_friends, driver, execute_order, init
 from driver import lift_find_floor, listen_all_buttons
 from Lift_struct import *
-from Network import PORT
+from Network import PORT, get_my_ip, broadcast_my_IP,receive
 
 from Order_Module import print_orderlist
 
 from File_Module import read_order_list_from_file
 
+from Lock_Manager import *
+
+
+
+
 
 def main():
-	lift = Lift(0)
-	driver.elev_init()
-	lift.ip_list = ['129.241.187.38', '129.241.187.157', '129.241.187.145']
+	
+	lift = init()
+
+	#set_ip_list(lift)
+	print(lift.ip_list)
+	print(lift.name)
+
+
+#	lift.ip_list = ['129.241.187.38', '129.241.187.157', '129.241.187.145']
 	lift.my_orders = read_order_list_from_file()
 	internal_button_queue = Queue.Queue()
 	external_button_queue = Queue.Queue()

@@ -64,14 +64,13 @@ def receive_and_confirm(lift, port):
 		return '0'
 		
 
-#Additional functions
-
 def receive(port, timeout, return_queue):
 	sock_receive = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 	sock_receive.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) #tells the kernel to reuse a local socket in TIME_WAIT state, without waiting for its natural timeout to expire
 	sock_receive.bind(('', port)) #maa bruke egen IP her
 	#sock_receive.setblocking(0)	#Kanskje vi ikke trenger denne for timeout likevel
 	data = '0'
+
 
 	ready = select.select([sock_receive], [], [], timeout)
 	if (ready[0]):
@@ -83,18 +82,75 @@ def receive(port, timeout, return_queue):
 	sock_receive.close()
 	return data
 
+def receive_IP(lift, port, return_queue):
+	sock_receive = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+	sock_receive.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) #tells the kernel to reuse a local socket in TIME_WAIT state, without waiting for its natural timeout to expire
+	sock_receive.bind(('', port)) #maa bruke egen IP her
 
 
+	while len(lift.ip_list) != 3:
+		data, addr = sock_receive.recvfrom(1024)
+		return_queue.put(data)
 
 
+	sock_receive.close()
+	return data		
+
+def set_ip_list(lift, ip_queue):
+
+	ip = ip_queue.get()
+	if len(lift.ip_list) == 0:
+		with lock:
+			lift.ip_list = [ip]
+
+	else:
+
+		is_in_list = False
+		for i in range (len(lift.ip_list)):
+			if lift.ip_list[i] == ip:
+				is_in_list = True
+
+		if is_in_list == False:
+			with lock:
+				lift.ip_list = lift.ip_list + [ip]
+
+
+	with lock:
+		sorter(lift.ip_list)
+		
+
+
+#Additional functions
+
+def sorter(lst):
+	new_list = []
+	n = 0
+	for index in range (len(lst)):
+		for i in range (len(lst[index])):
+			if lst[index][i] == '.':
+				n += 1
+				if n == 3:
+					num = lst[index][i + 1] + lst[index][i + 2] 
+					num = int(num)
+					if len(lst[index]) == 15:
+						num = lst[index][i + 1] + lst[index][i + 2] + lst[index][i + 3]
+						num = int(num)
+					new_list = new_list + [num]  
+
+		n = 0
+
+	for passesLeft in range(len(lst) - 1, 0, -1):
+		for index in range(passesLeft):
+			if new_list[index] > new_list[index + 1]:
+				new_list[index], new_list[index + 1] = new_list[index + 1], new_list[index]
+				lst[index], lst[index + 1] = lst[index + 1], lst[index]
 
 def get_my_ip():
 	s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 	s.connect(("gmail.com",80))
 	return (s.getsockname()[0])
 
-def broadcast_my_IP(port):
-#Steinars ip er 10.22.69.248
+def broadcast_my_IP(lift, port):
 	try :
 		s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 		#print ('Socket created'.encode())
@@ -108,8 +164,11 @@ def broadcast_my_IP(port):
 	MY_IP = get_my_ip()
 	print(b'Broadcasting my ip address!')
 	
-	while(True):
+
+	while len(lift.ip_list) != 3 :
 		s.sendto(MY_IP.encode(),('255.255.255.255',port))
-		#print(MY_IP)
-		time.sleep(1)
+		#time.sleep(3)
+		#break
+
+	print('Broadcasting done!')
 	s.close()
