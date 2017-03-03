@@ -2,6 +2,8 @@ from Lift_struct import *
 from File_Module import append_to_file
 from Lock_Manager import lock
 
+#interface functions
+
 def add_order_external_list(lift, order):
 	i = 0
 	while (i < len(lift.all_external_orders)): #Loop throws away duplicates
@@ -60,6 +62,18 @@ def add_order_to_my_orders(lift,order):
 #		lift.my_orders.insert(pos,Order(order.floor, ))
 
 
+def order_index_in_list(order, orderlist):
+	value = -1
+	for i in range (0, len(orderlist)):
+		if (orders_are_equal(order, orderlist[i])):
+			value = i
+	if (value == -1):
+		print("Order is not in list")
+	return value
+
+
+#Addtitional functions
+
 
 def print_order(order):
 	print ("[%d, %d]" % (order.floor, order.direction))
@@ -74,11 +88,3 @@ def orders_are_equal(order1, order2):
 	else:
 		return False
 
-def order_index_in_list(order, orderlist):
-	value = -1
-	for i in range (0, len(orderlist)):
-		if (orders_are_equal(order, orderlist[i])):
-			value = i
-	if (value == -1):
-		print("Order is not in list")
-	return value

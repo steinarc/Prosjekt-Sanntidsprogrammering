@@ -8,22 +8,7 @@ from Lock_Manager import lock
 
 PORT = 20298
 
-def receive(port, timeout, return_queue):
-	sock_receive = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-	sock_receive.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) #tells the kernel to reuse a local socket in TIME_WAIT state, without waiting for its natural timeout to expire
-	sock_receive.bind(('', port)) #maa bruke egen IP her
-	#sock_receive.setblocking(0)	#Kanskje vi ikke trenger denne for timeout likevel
-	data = '0'
-
-	ready = select.select([sock_receive], [], [], timeout)
-	if (ready[0]):
-		data, addr = sock_receive.recvfrom(1024)
-	if(data == '0'):
-		print("Nothing was received")	
-
-	return_queue.put(data)
-	sock_receive.close()
-	return data
+#Interface functions
 
 def send_and_spam_until_confirmation(lift, other_lift, port, data):
 
@@ -79,14 +64,24 @@ def receive_and_confirm(lift, port):
 		return '0'
 		
 
+#Additional functions
 
+def receive(port, timeout, return_queue):
+	sock_receive = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+	sock_receive.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) #tells the kernel to reuse a local socket in TIME_WAIT state, without waiting for its natural timeout to expire
+	sock_receive.bind(('', port)) #maa bruke egen IP her
+	#sock_receive.setblocking(0)	#Kanskje vi ikke trenger denne for timeout likevel
+	data = '0'
 
+	ready = select.select([sock_receive], [], [], timeout)
+	if (ready[0]):
+		data, addr = sock_receive.recvfrom(1024)
+	if(data == '0'):
+		print("Nothing was received")	
 
-
-
-
-
-
+	return_queue.put(data)
+	sock_receive.close()
+	return data
 
 
 

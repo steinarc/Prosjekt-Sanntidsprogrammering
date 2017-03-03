@@ -3,15 +3,10 @@ from Lift_struct import *
 from Message_Handling import encode_order, decode_order
 
 
-#def truncate_and_write_my_orders_to_file(lift):
-	#my_directory = os.getcwd()
-#	file = open(my_directory + '/Orders.txt', 'w')
-
-#	for i in range (0, len(lift.my_orders)):
-#		file.write(encode_order(lift.my_orders[i]) + '\n')
-#	file.close()
-
 FILENAME = '/Orders.txt'
+
+
+#Interface functions
 
 def append_to_file(order):
 	my_directory = os.getcwd()
@@ -40,7 +35,6 @@ def read_order_list_from_file():
 	order_list = []
 	order_str = ''
 	for line in lines:
-		#decode_order(line)
 		for i in range(0, len(line)):
 			if(line[i] != '\n'):
 				order_str = order_str + line[i]

@@ -2,6 +2,8 @@ from Lift_struct import *
 from Network import send_and_spam_until_confirmation, PORT
 from Cost import calculate_cost
 
+#Interface functions
+
 def send_order_message(lift, order):
 	message = encode_order_message(lift,order)
 	successful_orders_sent = 0
@@ -50,6 +52,7 @@ def classify_message(message_string):
 		return '0'
 
 
+#Additional functions (used by Lift_Control)
 
 def encode_order_message(lift, order):
 	s1 = ("%d," %(lift.name))
@@ -58,11 +61,11 @@ def encode_order_message(lift, order):
 	s4 = "0" #cost
 	return s1 + s2 + s3 + s4
 
-def decode_order_message(message): #message is a string
+def decode_order_message(message):
 	message = message.split(',')
 	lift_name = int(message[0])
 	order = decode_order(message[2])
-	return lift_name, order #Will return other values as well
+	return lift_name, order
 
 def encode_Im_alive_message(lift):
 	s1 = ("%d," %(lift.name))
@@ -108,17 +111,17 @@ def encode_executed_message(lift, order):
 	s3 = encode_order(order)
 	return s1 + s2 + s3
 
-def decode_executed_message(message): #So put your hands down my pants and i bet youll feel nuts
+def decode_executed_message(message):
 	message = message.split(',')
 	lift_name = int(message[0])
 	order = decode_order(message[2])
 	return lift_name, order
 
 
-def encode_order(order): #Returns a string
+def encode_order(order):
 	return ("%d %d" %(order.floor, order.direction))
 
-def decode_order(message): #Returns an order object from a string
+def decode_order(message):
 	if (message[0].isdigit() == False):	
 		print("Message is invalid")
 		return Order(0,0) #0,0-order is invalid order and will do nothing

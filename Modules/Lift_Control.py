@@ -12,38 +12,7 @@ from File_Module import delete_order_from_file
 
 driver = CDLL("./../driver/libdriver.so")
 
-def lift_go_to_floor(lift, floor, timeout):
-	prev_floor = -1
-	motor_is_set = 0
-	declared_dead = 0
-	starttime = time.time()
-	while(1):
-		if (lift.stopped == 1):
-			lift_stop(lift)
-			break
-		else:
-			if (lift.floor == floor and driver.elev_get_floor_sensor_signal() == floor ):
-				lift_stop(lift)
-				driver.elev_set_door_open_lamp(1)
-				time.sleep(2)
-				driver.elev_set_door_open_lamp(0)
-				lift.is_alive = 1
-				break
-			if (lift.floor < floor and (motor_is_set == 0)):
-				lift_move_direction(lift, 1)
-				motor_is_set = 1
-				starttime = time.time()
-			elif (lift.floor > floor and motor_is_set == 0):
-				lift_move_direction(lift, -1)
-				motor_is_set = 1
-				starttime = time.time()
-			if (time.time() - starttime > 10 and declared_dead == 0):
-				print("I am dead")
-				lift.is_alive = 0
-				declared_dead = 1
-
-			prev_floor = lift.floor
-
+#Interface functions
 
 def execute_order(lift):
 	if (len(lift.my_orders) > 0):
@@ -61,15 +30,10 @@ def execute_order(lift):
 				lift.my_orders.pop(0)
 
 
-
-#driver.elev_set_floor_indicator(3), viser hvor vi er.
-#driver.elev_set_button_lamp(button, floor, value), button: 0 = OPP, 1 = NED, 2 = HEISPANEL, value = AV/PA, 0/1
-#driver.elev_set_door_open_lamp(0) #, DOR APEN
-
 def listen_external_buttons_and_send_order(lift,port,button_queue):
 	while(1):
 		order_sent_successfully = False
-		if (lift.stopped == 1): #Does not work right after
+		if (lift.stopped == 1):
 			break
 		if (button_queue.empty() == 0):
 			order = button_queue.get()
@@ -166,3 +130,38 @@ def respond_to_message(lift,received_messages_queue):
 					with lock:
 						lift.all_external_orders.pop(index)
 					print("Order successfully removed")
+
+
+#Additional functions
+
+def lift_go_to_floor(lift, floor, timeout):
+	prev_floor = -1
+	motor_is_set = 0
+	declared_dead = 0
+	starttime = time.time()
+	while(1):
+		if (lift.stopped == 1):
+			lift_stop(lift)
+			break
+		else:
+			if (lift.floor == floor and driver.elev_get_floor_sensor_signal() == floor ):
+				lift_stop(lift)
+				driver.elev_set_door_open_lamp(1)
+				time.sleep(2)
+				driver.elev_set_door_open_lamp(0)
+				lift.is_alive = 1
+				break
+			if (lift.floor < floor and (motor_is_set == 0)):
+				lift_move_direction(lift, 1)
+				motor_is_set = 1
+				starttime = time.time()
+			elif (lift.floor > floor and motor_is_set == 0):
+				lift_move_direction(lift, -1)
+				motor_is_set = 1
+				starttime = time.time()
+			if (time.time() - starttime > 10 and declared_dead == 0):
+				print("I am dead")
+				lift.is_alive = 0
+				declared_dead = 1
+
+			prev_floor = lift.floor

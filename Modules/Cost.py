@@ -1,5 +1,6 @@
 from Lift_struct import *
 
+#Interface functions
 
 def calculate_cost(lift, order):
 	return (len(lift.my_orders) + abs(lift.floor - order.floor))

@@ -7,29 +7,8 @@ from Order_Module import add_order_to_my_orders
 
 driver = CDLL("./../driver/libdriver.so")
 
-def listen_button(button_type, floor, lift, button_queue): #type: 0 = up, 1 = down, 2 = internal
-	direction = 0
-	while(1):
-		if (driver.elev_get_button_signal(button_type, floor) == 1):
-			#print("%d, i etasje %d" % (button_type, floor + 1))			
-			if (button_type == 2):
-				order = Order(floor, 0) #direction = 0 for internal order
-				with lock:
-					add_order_to_my_orders(lift, order)
-				set_internal_lamp(order, 1)
-			else:
-				if (button_type == 0):
-					direction = 1
-				elif (button_type == 1):
-					direction = -1
-				order = Order(floor, direction)
-				with lock:
-					button_queue.put(order)			
-			time.sleep(1)
-		if (lift.stopped == 1): #Does not work right after
-			break
 
-
+#Interface functions
 
 def listen_all_buttons(lift, button_queue): #Run as thread
 	thread1 = Thread(target = listen_button, args = (0,0,lift, button_queue))
@@ -88,3 +67,27 @@ def set_external_lamp(order, value):
 def set_internal_lamp(order, value):
 	button = 2
 	driver.elev_set_button_lamp(button, order.floor, value)
+
+#Additional functions
+
+def listen_button(button_type, floor, lift, button_queue): #type: 0 = up, 1 = down, 2 = internal
+	direction = 0
+	while(1):
+		if (driver.elev_get_button_signal(button_type, floor) == 1):
+			#print("%d, i etasje %d" % (button_type, floor + 1))			
+			if (button_type == 2):
+				order = Order(floor, 0) #direction = 0 for internal order
+				with lock:
+					add_order_to_my_orders(lift, order)
+				set_internal_lamp(order, 1)
+			else:
+				if (button_type == 0):
+					direction = 1
+				elif (button_type == 1):
+					direction = -1
+				order = Order(floor, direction)
+				with lock:
+					button_queue.put(order)			
+			time.sleep(1)
+		if (lift.stopped == 1): #Does not work right after
+			break
