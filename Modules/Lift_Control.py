@@ -2,7 +2,7 @@ import time
 from ctypes import *
 from threading import Thread
 from Lift_struct import *
-from Order_Module import add_order_external_list, add_order_to_my_orders, order_index_in_list, print_orderlist
+from Order_Module import add_order_to_all_external_orders, add_order_to_my_orders, order_index_in_list, print_orderlist
 from driver import lift_move_direction, set_external_lamp, set_internal_lamp, lift_stop
 from Message_Handling import *
 from Network import receive_and_confirm
@@ -21,7 +21,7 @@ def execute_order(lift):
 			send_executed_message(lift,lift.my_orders[0])
 			set_external_lamp(lift.my_orders[0],0)
 			set_internal_lamp(lift.my_orders[0],0)
-			delete_order_from_file(lift.my_orders[0])
+			delete_order_from_file(Order(lift.my_orders[0].floor, 0))
 			index = order_index_in_list(lift.my_orders[0], lift.all_external_orders)
 			if (index != -1):
 				with lock:
@@ -30,14 +30,14 @@ def execute_order(lift):
 				lift.my_orders.pop(0)
 
 
-def listen_external_buttons_and_send_order(lift,port,button_queue):
+def do_work_based_on_button_press(lift,port,internal_button_queue, external_button_queue):
 	while(1):
 		order_sent_successfully = False
 		if (lift.stopped == 1):
 			break
-		if (button_queue.empty() == 0):
-			order = button_queue.get()
-			add_order_external_list(lift, order)
+		if (external_button_queue.empty() == 0):
+			order = external_button_queue.get()
+			add_order_to_all_external_orders(lift, order)
 			with lock:
 				lift.costlist[lift.name] = calculate_cost(lift,order)
 			order_sent_sucessfully = send_order_message(lift,order)
@@ -46,10 +46,13 @@ def listen_external_buttons_and_send_order(lift,port,button_queue):
 				print_orderlist(lift.all_external_orders)
 				add_order_to_my_orders(lift,order)
 				set_external_lamp(order,1)
+		if (internal_button_queue.empty() == 0):
+			order = internal_button_queue.get()
+			add_order_to_my_orders(lift, order)
 
 
 
-def broadcast_aliveness_and_check_friends(lift):
+def broadcast_aliveness_and_check_aliveness_of_friends(lift):
 	prev_active_lifts = [1, 1, 1]	
 	while(1):
 		send_Im_alive_message(lift)
@@ -88,7 +91,7 @@ def respond_to_message(lift,received_messages_queue):
 			if (message_type == 'Order'):
 				print("Order message received")
 				sending_lift, order = decode_order_message(message)
-				add_order_external_list(lift, order)
+				add_order_to_all_external_orders(lift, order)
 				cost = calculate_cost(lift, order)
 				send_cost_message(lift, order, sending_lift)
 		

@@ -3,24 +3,23 @@ import time
 from threading import Thread
 from Lift_struct import *
 from Lock_Manager import lock
-from Order_Module import add_order_to_my_orders
 
 driver = CDLL("./../driver/libdriver.so")
 
 
 #Interface functions
 
-def listen_all_buttons(lift, button_queue): #Run as thread
-	thread1 = Thread(target = listen_button, args = (0,0,lift, button_queue))
-	thread2 = Thread(target = listen_button, args = (0,1,lift, button_queue))
-	thread3 = Thread(target = listen_button, args = (0,2,lift, button_queue))
-	thread4 = Thread(target = listen_button, args = (1,1,lift, button_queue))
-	thread5 = Thread(target = listen_button, args = (1,2,lift, button_queue))
-	thread6 = Thread(target = listen_button, args = (1,3,lift, button_queue))
-	thread7 = Thread(target = listen_button, args = (2,0,lift, button_queue))
-	thread8 = Thread(target = listen_button, args = (2,1,lift, button_queue))
-	thread9 = Thread(target = listen_button, args = (2,2,lift, button_queue))
-	thread10 = Thread(target = listen_button, args = (2,3,lift, button_queue))
+def listen_all_buttons(lift, internal_button_queue, external_button_queue): #Run as thread
+	thread1 = Thread(target = listen_button, args = (0,0,lift, internal_button_queue, external_button_queue))
+	thread2 = Thread(target = listen_button, args = (0,1,lift, internal_button_queue, external_button_queue))
+	thread3 = Thread(target = listen_button, args = (0,2,lift, internal_button_queue, external_button_queue))
+	thread4 = Thread(target = listen_button, args = (1,1,lift, internal_button_queue, external_button_queue))
+	thread5 = Thread(target = listen_button, args = (1,2,lift, internal_button_queue, external_button_queue))
+	thread6 = Thread(target = listen_button, args = (1,3,lift, internal_button_queue, external_button_queue))
+	thread7 = Thread(target = listen_button, args = (2,0,lift, internal_button_queue, external_button_queue))
+	thread8 = Thread(target = listen_button, args = (2,1,lift, internal_button_queue, external_button_queue))
+	thread9 = Thread(target = listen_button, args = (2,2,lift, internal_button_queue, external_button_queue))
+	thread10 = Thread(target = listen_button, args = (2,3,lift, internal_button_queue, external_button_queue))
 	thread1.start()
 	thread2.start()
 	thread3.start()
@@ -70,15 +69,14 @@ def set_internal_lamp(order, value):
 
 #Additional functions
 
-def listen_button(button_type, floor, lift, button_queue): #type: 0 = up, 1 = down, 2 = internal
+def listen_button(button_type, floor, lift, internal_button_queue, external_button_queue): #type: 0 = up, 1 = down, 2 = internal
 	direction = 0
 	while(1):
-		if (driver.elev_get_button_signal(button_type, floor) == 1):
-			#print("%d, i etasje %d" % (button_type, floor + 1))			
+		if (driver.elev_get_button_signal(button_type, floor) == 1):		
 			if (button_type == 2):
 				order = Order(floor, 0) #direction = 0 for internal order
 				with lock:
-					add_order_to_my_orders(lift, order)
+					internal_button_queue.put(order)
 				set_internal_lamp(order, 1)
 			else:
 				if (button_type == 0):
@@ -87,7 +85,7 @@ def listen_button(button_type, floor, lift, button_queue): #type: 0 = up, 1 = do
 					direction = -1
 				order = Order(floor, direction)
 				with lock:
-					button_queue.put(order)			
+					external_button_queue.put(order)			
 			time.sleep(1)
 		if (lift.stopped == 1): #Does not work right after
 			break
