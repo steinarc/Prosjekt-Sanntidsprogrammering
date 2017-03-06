@@ -27,7 +27,6 @@ def send_and_spam_until_confirmation(lift, other_lift, port, data):
 		sock_send = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 		while(confirmation_thread.isAlive()): #While we wait for a confirmation send over and over again
 			sock_send.sendto(data, (remote_ip, port))
-			print('printer vi noe????')
 			time.sleep(0.1)
 			if (return_queue.empty() != True):
 				confirmation = return_queue.get()
