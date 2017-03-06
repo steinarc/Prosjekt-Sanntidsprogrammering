@@ -21,8 +21,6 @@ def add_order_to_my_orders(lift,order):
 	orderlist = lift.my_orders
 	i = 0
 	direction = order.direction
-	if (direction == 0):
-		append_to_file(Order(order.floor, direction))
 
 	while (i < len(orderlist)): #Loop throws away duplicates
 		if ((order.floor == orderlist[i].floor) and (order.direction == orderlist[i].direction)
@@ -31,13 +29,14 @@ def add_order_to_my_orders(lift,order):
 			break
 		i = i + 1
 
-	if (i == len(orderlist)): #Add the order, sort list
+	if (i == len(orderlist)): #Add the order
+		append_to_file(Order(order.floor, direction))
 
-		if (direction == 0):
-			if (lift.floor > order.floor):
-				direction = -1
-			else:
-				direction = 1
+#		if (direction == 0):
+#			if (lift.floor > order.floor):
+#				direction = -1
+#			else:
+#				direction = 1
 			
 		with lock:
 			lift.my_orders.extend([order])

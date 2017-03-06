@@ -38,6 +38,7 @@ def primary():
 
 	lift = Lift(LIFT_NUMBER)
 	driver.elev_init()
+	time.sleep(2)
 	lift.ip_list = ['129.241.187.152', '129.241.187.144', '129.241.187.145']
 	lift.my_orders = read_order_list_from_file()
 	internal_button_queue = Queue.Queue()
@@ -51,6 +52,7 @@ def primary():
 	thread_respond_to_message = Thread(target = respond_to_message, args = (lift, received_messages_queue))
 	thread_do_work_based_on_button_press = Thread(target = do_work_based_on_button_press, args = (lift,PORT, internal_button_queue, external_button_queue))
 	thread_broadcast_aliveness_and_check_aliveness_of_friends = Thread(target = broadcast_aliveness_and_check_aliveness_of_friends, args = (lift,))
+	thread_execute_order = Thread(target = execute_order, args = (lift,))
 	
 	thread_write_to_file.start()
 	thread_lift_find_floor.start()
@@ -59,9 +61,7 @@ def primary():
 	thread_respond_to_message.start()
 	thread_do_work_based_on_button_press.start()
 	thread_broadcast_aliveness_and_check_aliveness_of_friends.start()
-
-	while(1):
-		execute_order(lift)
+	thread_execute_order.start()
 
 
 

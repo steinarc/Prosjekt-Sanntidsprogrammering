@@ -15,19 +15,20 @@ driver = CDLL("./../driver/libdriver.so")
 #Interface functions
 
 def execute_order(lift):
-	if (len(lift.my_orders) > 0):
-		lift_go_to_floor(lift, lift.my_orders[0].floor, 0)
-		if (lift.floor == lift.my_orders[0].floor):
-			send_executed_message(lift,lift.my_orders[0])
-			set_external_lamp(lift.my_orders[0],0)
-			set_internal_lamp(lift.my_orders[0],0)
-			delete_order_from_file(Order(lift.my_orders[0].floor, 0))
-			index = order_index_in_list(lift.my_orders[0], lift.all_external_orders)
-			if (index != -1):
+	while(1):
+		if (len(lift.my_orders) > 0):
+			lift_go_to_floor(lift, lift.my_orders[0].floor, 0)
+			if (lift.floor == lift.my_orders[0].floor):
+				send_executed_message(lift,lift.my_orders[0])
+				set_external_lamp(lift.my_orders[0],0)
+				set_internal_lamp(lift.my_orders[0],0)
+				delete_order_from_file(Order(lift.my_orders[0].floor, lift.my_orders[0].direction))
+				index = order_index_in_list(lift.my_orders[0], lift.all_external_orders)
+				if (index != -1):
+					with lock:
+						lift.all_external_orders.pop(index)
 				with lock:
-					lift.all_external_orders.pop(index)
-			with lock:
-				lift.my_orders.pop(0)
+					lift.my_orders.pop(0)
 
 
 def do_work_based_on_button_press(lift,port,internal_button_queue, external_button_queue):
