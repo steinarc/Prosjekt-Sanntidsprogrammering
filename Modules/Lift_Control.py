@@ -1,12 +1,11 @@
 import time
-import Queue
 from ctypes import *
 from threading import Thread
 from Lift_struct import *
 from Order_Module import add_order_to_all_external_orders, add_order_to_my_orders, order_index_in_list, print_orderlist
 from driver import lift_move_direction, set_external_lamp, set_internal_lamp, lift_stop
 from Message_Handling import *
-from Network import receive_and_confirm, set_ip_list, broadcast_my_IP, receive, get_my_ip, PORT, receive_IP
+from Network import receive_and_confirm
 from Lock_Manager import lock
 from Cost import calculate_cost, costlist_is_full, find_lift_with_minimal_cost
 from File_Module import delete_order_from_file
@@ -14,37 +13,6 @@ from File_Module import delete_order_from_file
 driver = CDLL("./../driver/libdriver.so")
 
 #Interface functions
-
-def init():
-	
-	lift = Lift(0)
-	MY_IP = get_my_ip()
-	lift.ip_list = ['129.241.187.156', '129.241.187.160']
-
-	queue = Queue.Queue()
-	driver.elev_init()
-
-	thread_broadcast = Thread(target = broadcast_my_IP, args = (lift, PORT))
-	thread_receive = Thread(target = receive_IP, args = (lift, PORT, queue))
-	#thread_list = Thread(target = set_ip_list, args = (lift, queue))
-
-	thread_receive.start()
-	thread_broadcast.start()
-	#thread_list.start()
-
-	while (len(lift.ip_list) != 3):
-		set_ip_list(lift, queue)
-
-	thread_receive.join()
-	thread_broadcast.join()
-
-	for n in range (len(lift.ip_list)):
-		if (lift.ip_list[n] == MY_IP):
-			with lock:
-				lift.name = n
-
-	return lift
-
 
 def execute_order(lift):
 	if (len(lift.my_orders) > 0):
@@ -72,10 +40,12 @@ def do_work_based_on_button_press(lift,port,internal_button_queue, external_butt
 			add_order_to_all_external_orders(lift, order)
 			with lock:
 				lift.costlist[lift.name] = calculate_cost(lift,order)
-			order_sent_sucessfully = send_order_message(lift,order)
+			if (lift.is_busy == False):	
+				order_sent_sucessfully = send_order_message(lift,order)
+				if (order_sent_sucessfully == True):
+					with lock:
+						lift.is_busy = True
 			if (order_sent_sucessfully == False):
-				print("List of orders:")
-				print_orderlist(lift.all_external_orders)
 				add_order_to_my_orders(lift,order)
 				set_external_lamp(order,1)
 		if (internal_button_queue.empty() == 0):
@@ -92,6 +62,8 @@ def broadcast_aliveness_and_check_aliveness_of_friends(lift):
 			for i in range (0, 3):
 				if (i != lift.name):
 					if (prev_active_lifts[i] == 1 and lift.active_lifts[i] == 0):
+						print("lift %d just died" % (i))
+						lift.is_busy = False
 						if ((i + 1) % 3 == lift.name or lift.active_lifts[(i+1) % 3] == 0): #2 is backup for 1, 1 is backup for 0 and 0 for 2
 							for x in range (0, len(lift.all_external_orders)):
 								add_order_to_my_orders(lift, lift.all_external_orders[x])
@@ -104,7 +76,7 @@ def broadcast_aliveness_and_check_aliveness_of_friends(lift):
 
 		
 
-def receive_message(lift, port, received_messages_queue): #will always be run as a thread ALWAYS!
+def receive_message(lift, port, received_messages_queue):
 	while(1):
 		message = receive_and_confirm(lift, port) # The function will wait here until something is received
 		with lock:
@@ -148,6 +120,7 @@ def respond_to_message(lift,received_messages_queue):
 					set_external_lamp(order, 1)
 					with lock:	
 						lift.costlist = [-1, -1, -1]
+						lift.is_busy = False
 
 			elif(message_type == 'Command'):
 				print("Command message received")
@@ -171,7 +144,6 @@ def respond_to_message(lift,received_messages_queue):
 
 def lift_go_to_floor(lift, floor, timeout):
 	prev_floor = -1
-	motor_is_set = 0
 	declared_dead = 0
 	starttime = time.time()
 	while(1):
@@ -186,11 +158,11 @@ def lift_go_to_floor(lift, floor, timeout):
 				driver.elev_set_door_open_lamp(0)
 				lift.is_alive = 1
 				break
-			if (lift.floor < floor and (motor_is_set == 0)):
+			if (lift.floor < floor):
 				lift_move_direction(lift, 1)
 				motor_is_set = 1
 				starttime = time.time()
-			elif (lift.floor > floor and motor_is_set == 0):
+			elif (lift.floor > floor):
 				lift_move_direction(lift, -1)
 				motor_is_set = 1
 				starttime = time.time()
