@@ -39,7 +39,7 @@ def primary():
 	lift = Lift(LIFT_NUMBER)
 	driver.elev_init()
 	time.sleep(2)
-	lift.ip_list = ['129.241.187.151', '129.241.187.145', '129.241.187.146']
+	lift.ip_list = ['129.241.187.151', '129.241.187.145', '129.241.187.157']
 	lift.my_orders = read_order_list_from_file()
 	internal_button_queue = Queue.Queue()
 	external_button_queue = Queue.Queue()

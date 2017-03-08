@@ -42,6 +42,7 @@ def do_work_based_on_button_press(lift,port,internal_button_queue, external_butt
 			with lock:
 				lift.costlist[lift.name] = calculate_cost(lift,order)
 			order_sent_sucessfully = send_order_message(lift,order)
+			print("Order message just sent success = %d" % (order_sent_sucessfully))
 			if (order_sent_sucessfully == False):
 				add_order_to_my_orders(lift,order)
 				set_external_lamp(order,1)
@@ -143,6 +144,8 @@ def lift_go_to_floor(lift, floor, timeout):
 	starttime = time.time()
 	while(1):
 		if (lift.stopped == 1):
+			with lock: 
+				lift.is_alive = 0
 			lift_stop(lift)
 			break
 		else:
@@ -151,7 +154,8 @@ def lift_go_to_floor(lift, floor, timeout):
 				driver.elev_set_door_open_lamp(1)
 				time.sleep(2)
 				driver.elev_set_door_open_lamp(0)
-				lift.is_alive = 1
+				with lock:
+					lift.is_alive = 1
 				break
 			if (lift.floor < floor):
 				lift_move_direction(lift, 1)
@@ -163,7 +167,8 @@ def lift_go_to_floor(lift, floor, timeout):
 				starttime = time.time()
 			if (time.time() - starttime > 10 and declared_dead == 0):
 				print("I am dead")
-				lift.is_alive = 0
+				with lock:
+					lift.is_alive = 0
 				declared_dead = 1
 
 			prev_floor = lift.floor
