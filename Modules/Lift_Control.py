@@ -41,11 +41,7 @@ def do_work_based_on_button_press(lift,port,internal_button_queue, external_butt
 			add_order_to_all_external_orders(lift, order)
 			with lock:
 				lift.costlist[lift.name] = calculate_cost(lift,order)
-			if (lift.is_busy == False):	
-				order_sent_sucessfully = send_order_message(lift,order)
-				if (order_sent_sucessfully == True):
-					with lock:
-						lift.is_busy = True
+			order_sent_sucessfully = send_order_message(lift,order)
 			if (order_sent_sucessfully == False):
 				add_order_to_my_orders(lift,order)
 				set_external_lamp(order,1)
@@ -64,7 +60,6 @@ def broadcast_aliveness_and_check_aliveness_of_friends(lift):
 				if (i != lift.name):
 					if (prev_active_lifts[i] == 1 and lift.active_lifts[i] == 0):
 						print("lift %d just died" % (i))
-						lift.is_busy = False
 						if ((i + 1) % 3 == lift.name or lift.active_lifts[(i+1) % 3] == 0): #2 is backup for 1, 1 is backup for 0 and 0 for 2
 							for x in range (0, len(lift.all_external_orders)):
 								add_order_to_my_orders(lift, lift.all_external_orders[x])
@@ -121,7 +116,6 @@ def respond_to_message(lift,received_messages_queue):
 					set_external_lamp(order, 1)
 					with lock:	
 						lift.costlist = [-1, -1, -1]
-						lift.is_busy = False
 
 			elif(message_type == 'Command'):
 				print("Command message received")
